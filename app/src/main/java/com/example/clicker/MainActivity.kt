@@ -54,7 +54,7 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
-        setContent { SmallNavigationExample() }
+        setContent { ClickerTheme { SmallNavigationExample() } }
 
         Log.d(TAG, "onCreate")
     }

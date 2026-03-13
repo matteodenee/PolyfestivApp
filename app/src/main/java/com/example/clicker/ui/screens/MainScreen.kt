@@ -12,11 +12,17 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Album
+import androidx.compose.material.icons.filled.Casino
+import androidx.compose.material.icons.filled.Celebration
+import androidx.compose.material.icons.filled.Games
+import androidx.compose.material.icons.filled.Group
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PlaylistAddCircle
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.SportsEsports
+import androidx.compose.material.icons.filled.Storefront
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -25,6 +31,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -46,6 +53,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.ui.NavDisplay
+import com.example.clicker.ui.theme.PrimaryYellow
 
 class MainScreen : ComponentActivity() {
     enum class Destination(
@@ -54,12 +62,9 @@ class MainScreen : ComponentActivity() {
         val icon: ImageVector,
         val contentDescription: String,
     ) {
-//        SONGS("songs", "Songs", Icons.Default.MusicNote, "Songs"),
-//        ALBUM("album", "Album", Icons.Default.Album, "Album"),
-//        PLAYLISTS("playlist", "Playlist", Icons.Default.PlaylistAddCircle, "Playlist"),
-        HOME(route="home", label="Home", Icons.Default.Home, contentDescription = "Home"),
-        PROFILE(route="profile", label="Profile", Icons.Default.Person, contentDescription = "Profile"),
-        SETTINGS(route="settings", label="Settings", Icons.Default.Settings, contentDescription = "Settings")
+        FESTIVALS(route="festivals", label="Festivals", Icons.Default.Celebration, contentDescription = "Festival"),
+        JEUX(route="jeux", label="Jeux", Icons.Default.Casino, contentDescription = "Jeux"),
+        EXPOSANTS(route="exposants", label="Exposants", Icons.Default.Storefront, contentDescription = "Exposants")
     }
 }
 
@@ -85,14 +90,15 @@ fun Clicker(mainScreenViewModel: MainScreenViewModel = viewModel(), modifier: Mo
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SmallNavigationExample() {
-    val backStack = rememberSaveable() { mutableStateListOf(MainScreen.Destination.HOME) }
+    val backStack = rememberSaveable() { mutableStateListOf(MainScreen.Destination.FESTIVALS) }
 
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.primary,
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimary,
+                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimary
                 ),
                 title = {
                     Text("Small Top App Bar")
@@ -109,12 +115,10 @@ fun SmallNavigationExample() {
         },
         bottomBar = {
             BottomAppBar(
-                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                contentColor = MaterialTheme.colorScheme.primary,
+                containerColor = MaterialTheme.colorScheme.primary
             ) {
                 NavigationBar(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    contentColor = MaterialTheme.colorScheme.primary,
+                    containerColor = MaterialTheme.colorScheme.primary,
                 ) {
                     MainScreen.Destination.entries.forEachIndexed { index, destination ->
                         NavigationBarItem(
@@ -127,7 +131,11 @@ fun SmallNavigationExample() {
                                     contentDescription = destination.contentDescription
                                 )
                             },
-                            label = { Text(destination.label) }
+                            label = { Text(destination.label) },
+                            colors = NavigationBarItemDefaults.colors(
+                                indicatorColor = PrimaryYellow,
+                            )
+
                         )
                     }
                 }
@@ -139,9 +147,12 @@ fun SmallNavigationExample() {
             onBack = { backStack.removeLastOrNull() },
             entryProvider = { key ->
                 when (key) {
-                    MainScreen.Destination.HOME -> NavEntry(key)
+                    MainScreen.Destination.FESTIVALS -> NavEntry(key)
                     {
-                        Surface(modifier = Modifier.fillMaxSize()) {
+                        Surface(
+                            modifier = Modifier.fillMaxSize(),
+                            color = MaterialTheme.colorScheme.surface
+                        ) {
                             Row(
                                 modifier = Modifier.padding(vertical = 100.dp),
                                 horizontalArrangement = Arrangement.Center
@@ -151,19 +162,19 @@ fun SmallNavigationExample() {
                         }
                     }
 
-                    MainScreen.Destination.PROFILE -> NavEntry(key)
+                    MainScreen.Destination.JEUX -> NavEntry(key)
                     {
                         Box(modifier = Modifier.padding(paddingValues = innerPadding))
                         {
-                            Text("Profile")
+                            Text("Jeux")
                         }
                     }
 
-                    MainScreen.Destination.SETTINGS -> NavEntry(key)
+                    MainScreen.Destination.EXPOSANTS -> NavEntry(key)
                     {
                         Box(modifier = Modifier.padding(paddingValues = innerPadding))
                         {
-                            Text("Settings")
+                            Text("Exposants")
                         }
                     }
 
