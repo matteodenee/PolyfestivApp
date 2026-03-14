@@ -1,10 +1,9 @@
 package com.example.clicker.ui.screens.login
 
+import com.example.clicker.data.local.UserEntity
+
 
 data class LoginUiState(
-    val login: String = "",
-    val password: String = "",
-    val isLoading: Boolean = false,
-    val errorMessage: String? = null,
+    val currentUser: UserEntity? = null,
     val isLoggedIn: Boolean = false
 )
