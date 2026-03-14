@@ -1,4 +1,4 @@
-package com.example.clicker.data.remote
+package com.example.clicker.data.auth
 
 import retrofit2.http.Body
 import retrofit2.http.POST

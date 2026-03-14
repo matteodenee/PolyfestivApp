@@ -1,4 +1,4 @@
-package com.example.clicker.data.remote
+package com.example.clicker.data.auth
 
 class AuthRepository(private val api: AuthApiService) {
 
