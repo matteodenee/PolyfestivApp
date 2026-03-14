@@ -11,20 +11,19 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.clicker.ui.AppViewModelProvider
 import com.example.clicker.ui.theme.ButtonBlue
@@ -32,15 +31,13 @@ import com.example.clicker.ui.theme.SearchField
 
 @Composable
 fun LoginScreen(
+    onLoginSuccess: () -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: LoginViewModel = viewModel(factory = AppViewModelProvider.Factory)
+    loginViewModel: LoginViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-
-    var login by rememberSaveable { mutableStateOf("") }
-    var password by rememberSaveable { mutableStateOf("") }
-
-    val currentUser = uiState.currentUser
+    val state = loginViewModel.state.value
+    val login by loginViewModel.loginText
+    val password by loginViewModel.passwordText
 
     Column(
         modifier = modifier
@@ -50,77 +47,92 @@ fun LoginScreen(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(
-            text = "Se connecter",
-            style = MaterialTheme.typography.headlineSmall,
-            color = MaterialTheme.colorScheme.onBackground
-        )
+        when (val uiState = state) {
+            is LoginUiState.Loading -> {
+                CircularProgressIndicator()
+            }
 
-        Spacer(modifier = Modifier.height(16.dp))
+            is LoginUiState.Success -> {
+                LaunchedEffect(Unit) {
+                    onLoginSuccess()
+                }
+            }
 
-        OutlinedTextField(
-            value = login,
-            onValueChange = { login = it },
-            label = { Text("login") },
-            singleLine = true,
-            shape = RoundedCornerShape(6.dp),
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedContainerColor = SearchField,
-                unfocusedContainerColor = SearchField,
-                disabledContainerColor = SearchField,
-                focusedBorderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
-                unfocusedBorderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f),
-                focusedTextColor = MaterialTheme.colorScheme.onSurface,
-                unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
-                focusedLabelColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
-                unfocusedLabelColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-            ),
-            modifier = Modifier.fillMaxWidth(0.65f)
-        )
+            else -> {
+                Text(
+                    text = "Se connecter",
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
 
-        Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
-        OutlinedTextField(
-            value = password,
-            onValueChange = { password = it },
-            label = { Text("password") },
-            singleLine = true,
-            visualTransformation = PasswordVisualTransformation(),
-            shape = RoundedCornerShape(6.dp),
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedContainerColor = SearchField,
-                unfocusedContainerColor = SearchField,
-                disabledContainerColor = SearchField,
-                focusedBorderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
-                unfocusedBorderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f),
-                focusedTextColor = MaterialTheme.colorScheme.onSurface,
-                unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
-                focusedLabelColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
-                unfocusedLabelColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-            ),
-            modifier = Modifier.fillMaxWidth(0.65f)
-        )
+                OutlinedTextField(
+                    value = login,
+                    onValueChange = loginViewModel::onLoginChange,
+                    label = { Text("login") },
+                    singleLine = true,
+                    shape = RoundedCornerShape(6.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedContainerColor = SearchField,
+                        unfocusedContainerColor = SearchField,
+                        disabledContainerColor = SearchField,
+                        focusedBorderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
+                        unfocusedBorderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f),
+                        focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                        unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                        focusedLabelColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
+                        unfocusedLabelColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                    ),
+                    modifier = Modifier.fillMaxWidth(0.65f)
+                )
 
-        Spacer(modifier = Modifier.height(18.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
-        Button(
-            onClick = { viewModel.insertTestUser() },
-            colors = ButtonDefaults.buttonColors(
-                containerColor = ButtonBlue,
-                contentColor = MaterialTheme.colorScheme.onSecondary
-            ),
-            shape = RoundedCornerShape(22.dp)
-        ) {
-            Text("Valider")
-        }
+                OutlinedTextField(
+                    value = password,
+                    onValueChange = loginViewModel::onPasswordChange,
+                    label = { Text("password") },
+                    singleLine = true,
+                    visualTransformation = PasswordVisualTransformation(),
+                    shape = RoundedCornerShape(6.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedContainerColor = SearchField,
+                        unfocusedContainerColor = SearchField,
+                        disabledContainerColor = SearchField,
+                        focusedBorderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
+                        unfocusedBorderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f),
+                        focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                        unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+                        focusedLabelColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
+                        unfocusedLabelColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                    ),
+                    modifier = Modifier.fillMaxWidth(0.65f)
+                )
 
-        if (uiState.isLoggedIn && currentUser != null) {
-            Spacer(modifier = Modifier.height(24.dp))
-            Text(
-                text = "Connecté : ${currentUser.login}",
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onBackground
-            )
+                Spacer(modifier = Modifier.height(18.dp))
+
+                Button(
+                    onClick = {
+                        loginViewModel.login(onSuccessNavigate = onLoginSuccess)
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = ButtonBlue,
+                        contentColor = MaterialTheme.colorScheme.onSecondary
+                    ),
+                    shape = RoundedCornerShape(22.dp)
+                ) {
+                    Text("Valider")
+                }
+
+                if (uiState is LoginUiState.Error) {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = uiState.message,
+                        color = Color.Red
+                    )
+                }
+            }
         }
     }
 }
