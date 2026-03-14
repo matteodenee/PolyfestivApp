@@ -8,6 +8,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.clicker.ui.screens.MainScreen
 import com.example.clicker.ui.screens.login.LoginScreen
+import com.example.clicker.ui.screens.register.RegisterScreen
 
 @Composable
 fun ClickerNavHost(
@@ -24,6 +25,23 @@ fun ClickerNavHost(
                 onLoginSuccess = {
                     navController.navigate("main") {
                         popUpTo(LoginDestination.route) { inclusive = true }
+                    }
+                },
+                onNavigateToRegister = {
+                    navController.navigate(RegisterDestination.route)
+                }
+            )
+        }
+        composable(route = RegisterDestination.route) {
+            RegisterScreen(
+                onRegisterSuccess = {
+                    navController.navigate(LoginDestination.route) {
+                        popUpTo(RegisterDestination.route) { inclusive = true }
+                    }
+                },
+                onNavigateToLogin = {
+                    navController.navigate(LoginDestination.route) {
+                        popUpTo(RegisterDestination.route) { inclusive = true }
                     }
                 }
             )
