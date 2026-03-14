@@ -8,11 +8,17 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.clicker.ClickerApplication
 import com.example.clicker.ui.screens.login.LoginViewModel
+import com.example.clicker.ui.screens.register.RegisterViewModel
 
 object AppViewModelProvider {
     val Factory = viewModelFactory {
         initializer {
             LoginViewModel(
+                clickerApplication().container.authRepository
+            )
+        }
+        initializer {
+            RegisterViewModel(
                 clickerApplication().container.authRepository
             )
         }
