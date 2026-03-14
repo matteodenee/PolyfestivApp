@@ -32,6 +32,7 @@ import com.example.clicker.ui.theme.SearchField
 @Composable
 fun LoginScreen(
     onLoginSuccess: () -> Unit,
+    onNavigateToRegister: () -> Unit,
     modifier: Modifier = Modifier,
     loginViewModel: LoginViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
@@ -123,6 +124,22 @@ fun LoginScreen(
                     shape = RoundedCornerShape(22.dp)
                 ) {
                     Text("Valider")
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Text(
+                    text = "Vous n’avez pas de compte ?",
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Button(
+                    onClick = onNavigateToRegister,
+                    shape = RoundedCornerShape(22.dp)
+                ) {
+                    Text("Inscription")
                 }
 
                 if (uiState is LoginUiState.Error) {
