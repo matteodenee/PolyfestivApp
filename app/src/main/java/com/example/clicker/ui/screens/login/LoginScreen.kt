@@ -6,8 +6,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -24,22 +24,25 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.clicker.ui.AppViewModelProvider
 import com.example.clicker.ui.theme.ButtonBlue
-import com.example.clicker.ui.theme.ButtonOrange
 import com.example.clicker.ui.theme.SearchField
 
 @Composable
 fun LoginScreen(
-    viewModel: LoginViewModel,
-    onRegisterClick: () -> Unit = {}
+    modifier: Modifier = Modifier,
+    viewModel: LoginViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     var login by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
 
+    val currentUser = uiState.currentUser
+
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
             .padding(horizontal = 24.dp, vertical = 20.dp),
@@ -70,8 +73,7 @@ fun LoginScreen(
                 focusedLabelColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
                 unfocusedLabelColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
             ),
-            modifier = Modifier
-                .fillMaxWidth(0.65f)
+            modifier = Modifier.fillMaxWidth(0.65f)
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -94,8 +96,7 @@ fun LoginScreen(
                 focusedLabelColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
                 unfocusedLabelColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
             ),
-            modifier = Modifier
-                .fillMaxWidth(0.65f)
+            modifier = Modifier.fillMaxWidth(0.65f)
         )
 
         Spacer(modifier = Modifier.height(18.dp))
@@ -110,29 +111,6 @@ fun LoginScreen(
         ) {
             Text("Valider")
         }
-
-        Spacer(modifier = Modifier.height(20.dp))
-
-        Text(
-            text = "Vous n’avez pas de compte ?",
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onBackground
-        )
-
-        Spacer(modifier = Modifier.height(14.dp))
-
-        Button(
-            onClick = onRegisterClick,
-            colors = ButtonDefaults.buttonColors(
-                containerColor = ButtonOrange,
-                contentColor = MaterialTheme.colorScheme.onSecondary
-            ),
-            shape = RoundedCornerShape(22.dp)
-        ) {
-            Text("Inscription")
-        }
-
-        val currentUser = uiState.currentUser
 
         if (uiState.isLoggedIn && currentUser != null) {
             Spacer(modifier = Modifier.height(24.dp))
