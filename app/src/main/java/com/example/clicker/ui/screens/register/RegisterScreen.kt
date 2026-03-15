@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.clicker.ui.AppViewModelProvider
 import com.example.clicker.ui.theme.ButtonBlue
+import com.example.clicker.ui.theme.ButtonOrange
 import com.example.clicker.ui.theme.SearchField
 
 @Composable
@@ -142,6 +143,10 @@ fun RegisterScreen(
 
                 Button(
                     onClick = onNavigateToLogin,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = ButtonOrange,
+                        contentColor = MaterialTheme.colorScheme.onSecondary
+                    ),
                     shape = RoundedCornerShape(22.dp)
                 ) {
                     Text("Connexion")
