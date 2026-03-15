@@ -25,7 +25,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.clicker.ui.AppViewModelProvider
+import com.example.clicker.ui.viewmodel.AppViewModelProvider
 import com.example.clicker.ui.theme.ButtonBlue
 import com.example.clicker.ui.theme.ButtonOrange
 import com.example.clicker.ui.theme.SearchField
