@@ -1,6 +1,6 @@
-package com.example.clicker.data.auth
+package com.example.clicker.data.network
 
-
+import com.example.clicker.data.auth.AuthApiService
 import kotlinx.serialization.json.Json
 import okhttp3.JavaNetCookieJar
 import okhttp3.MediaType.Companion.toMediaType

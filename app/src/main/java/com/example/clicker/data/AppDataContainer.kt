@@ -1,7 +1,7 @@
 package com.example.clicker.data
 
 import com.example.clicker.data.auth.AuthRepository
-import com.example.clicker.data.auth.RetrofitInstance
+import com.example.clicker.data.network.RetrofitInstance
 
 
 class AppDataContainer : AppContainer {
