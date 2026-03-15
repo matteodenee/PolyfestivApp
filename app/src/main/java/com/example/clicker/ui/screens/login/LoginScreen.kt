@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.clicker.ui.AppViewModelProvider
 import com.example.clicker.ui.theme.ButtonBlue
+import com.example.clicker.ui.theme.ButtonOrange
 import com.example.clicker.ui.theme.SearchField
 
 @Composable
@@ -137,7 +138,11 @@ fun LoginScreen(
 
                 Button(
                     onClick = onNavigateToRegister,
-                    shape = RoundedCornerShape(22.dp)
+                    shape = RoundedCornerShape(22.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = ButtonOrange,
+                        contentColor = MaterialTheme.colorScheme.onSecondary
+                    ),
                 ) {
                     Text("Inscription")
                 }
