@@ -16,14 +16,6 @@ import androidx.compose.material.icons.filled.Celebration
 import androidx.compose.material.icons.filled.Album
 import androidx.compose.material.icons.filled.Casino
 import androidx.compose.material.icons.filled.Celebration
-import androidx.compose.material.icons.filled.Games
-import androidx.compose.material.icons.filled.Group
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.MusicNote
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.PlaylistAddCircle
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.SportsEsports
 import androidx.compose.material.icons.filled.Storefront
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -197,8 +189,7 @@ fun SmallNavigationExample() {
             },
             entryProvider = { key ->
                 when (key) {
-                    MainScreen.Destination.FESTIVALS -> NavEntry(key)
-                    {
+                    MainScreen.Destination.FESTIVALS -> NavEntry(key) {
                         Surface(
                             modifier = Modifier.fillMaxSize(),
                             color = MaterialTheme.colorScheme.surface
@@ -226,12 +217,10 @@ fun SmallNavigationExample() {
                         }
                     }
 
-                    MainScreen.Destination.EXPOSANTS -> NavEntry(key)
-                    {
-                        Box(modifier = Modifier.padding(paddingValues = innerPadding))
-                        {
-                            Text("Exposants")
-                        }
+                    MainScreen.Destination.EXPOSANTS -> NavEntry(key) {
+                        ExposantsScreen(
+                            modifier = Modifier.padding(innerPadding)
+                        )
                     }
 
                     else -> NavEntry(key) {
