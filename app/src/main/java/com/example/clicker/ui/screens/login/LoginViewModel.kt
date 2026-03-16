@@ -68,12 +68,15 @@ class LoginViewModel(
         }
     }
 
-    fun restoreSessionIfNeeded(
-        onSessionFound: () -> Unit
-    ) {
+    fun restoreSessionIfNeeded(onSessionFound: () -> Unit) {
         viewModelScope.launch {
             sessionPreferencesRepository.sessionCookie.collect { savedCookie ->
-                if (!savedCookie.isNullOrBlank()) {
+
+                if (savedCookie.isNullOrBlank()) {
+                    Log.d(TAG, "Aucune session sauvegardée")
+                } else {
+                    Log.d(TAG, "Session restaurée avec cookie : $savedCookie")
+
                     SessionCookieHolder.cookie = savedCookie
                     onSessionFound()
                 }
