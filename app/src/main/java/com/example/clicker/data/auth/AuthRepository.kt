@@ -3,7 +3,6 @@ package com.example.clicker.data.auth
 class AuthRepository(private val api: AuthApiService) {
 
     suspend fun login(login: String, password: String): LoginResult {
-
         val httpResponse = api.login(
             LoginRequest(
                 login = login,
@@ -16,16 +15,24 @@ class AuthRepository(private val api: AuthApiService) {
         }
 
         val body = httpResponse.body()
-
         if (body == null) {
             throw Exception("Réponse vide du serveur")
         }
 
-        val setCookieHeader = httpResponse.headers()["Set-Cookie"]
+        val cookies = httpResponse.headers().values("Set-Cookie")
+
+        val accessCookie = cookies
+            .find { it.startsWith("access_token=") }
+            ?.substringBefore(";")
+
+        val refreshCookie = cookies
+            .find { it.startsWith("refresh_token=") }
+            ?.substringBefore(";")
 
         return LoginResult(
             response = body,
-            cookie = setCookieHeader
+            accessCookie = accessCookie,
+            refreshCookie = refreshCookie
         )
     }
 
@@ -36,5 +43,21 @@ class AuthRepository(private val api: AuthApiService) {
                 password = password
             )
         )
+    }
+
+    suspend fun checkSession(): Boolean {
+        val response = api.me()
+        return response.isSuccessful
+    }
+
+    suspend fun refreshSession(): String? {
+        val response = api.refresh()
+        if (!response.isSuccessful) {
+            return null
+        }
+        val cookies = response.headers().values("Set-Cookie")
+        return cookies
+            .find { it.startsWith("access_token=") }
+            ?.substringBefore(";")
     }
 }
