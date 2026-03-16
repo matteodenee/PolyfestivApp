@@ -26,7 +26,10 @@ class ExposantViewModel(
     fun loadExposants() {
         viewModelScope.launch {
             _uiState.update { current ->
-                current.copy(isLoading = true, errorMessage = null)
+                current.copy(
+                    isLoading = true,
+                    errorMessage = null
+                )
             }
 
             try {
@@ -34,8 +37,7 @@ class ExposantViewModel(
                 _uiState.update { current ->
                     current.copy(
                         isLoading = false,
-                        exposants = exposants,
-                        errorMessage = null,
+                        exposants = exposants
                     )
                 }
             } catch (e: Exception) {
@@ -59,7 +61,7 @@ class ExposantViewModel(
         _uiState.update { current ->
             current.copy(
                 selectedExposantId = exposantId,
-                currentPage = ExposantsPage.DETAIL,
+                currentPage = ExposantsPage.DETAIL
             )
         }
     }
@@ -69,7 +71,7 @@ class ExposantViewModel(
             current.copy(
                 currentPage = ExposantsPage.FORM,
                 formMode = ExposantFormMode.CREATE,
-                selectedExposantId = null,
+                selectedExposantId = null
             )
         }
     }
@@ -78,24 +80,24 @@ class ExposantViewModel(
         _uiState.update { current ->
             current.copy(
                 currentPage = ExposantsPage.FORM,
-                formMode = ExposantFormMode.EDIT,
+                formMode = ExposantFormMode.EDIT
             )
         }
     }
 
     fun back() {
-        val currentState = _uiState.value
-
-        when (currentState.currentPage) {
+        when (_uiState.value.currentPage) {
             ExposantsPage.LIST -> Unit
+
             ExposantsPage.DETAIL -> {
                 _uiState.update { current ->
                     current.copy(
                         currentPage = ExposantsPage.LIST,
-                        selectedExposantId = null,
+                        selectedExposantId = null
                     )
                 }
             }
+
             ExposantsPage.FORM -> {
                 _uiState.update { current ->
                     current.copy(
@@ -122,7 +124,7 @@ class ExposantViewModel(
                     actorType = actorTypes,
                     phone = formData.phone.trim().ifBlank { null },
                     email = formData.email.trim().ifBlank { null },
-                    description = formData.description.trim().ifBlank { null },
+                    description = formData.description.trim().ifBlank { null }
                 )
 
                 repository.addExposant(newExposant)
@@ -133,27 +135,27 @@ class ExposantViewModel(
                         exposants = exposants,
                         currentPage = ExposantsPage.LIST,
                         formMode = ExposantFormMode.CREATE,
-                        selectedExposantId = null,
+                        selectedExposantId = null
                     )
                 }
             } else {
                 val selected = _uiState.value.selectedExposant ?: return@launch
 
-                val updated = selected.copy(
+                val updatedExposant = selected.copy(
                     name = formData.name.trim(),
                     actorType = actorTypes,
                     phone = formData.phone.trim().ifBlank { null },
                     email = formData.email.trim().ifBlank { null },
-                    description = formData.description.trim().ifBlank { null },
+                    description = formData.description.trim().ifBlank { null }
                 )
 
-                repository.updateExposant(updated)
+                repository.updateExposant(updatedExposant)
                 val exposants = repository.getExposants()
 
                 _uiState.update { current ->
                     current.copy(
                         exposants = exposants,
-                        currentPage = ExposantsPage.DETAIL,
+                        currentPage = ExposantsPage.DETAIL
                     )
                 }
             }
@@ -164,4 +166,16 @@ class ExposantViewModel(
         val selectedId = _uiState.value.selectedExposantId ?: return
 
         viewModelScope.launch {
-            repository.delete
+            repository.deleteExposant(selectedId)
+            val exposants = repository.getExposants()
+
+            _uiState.update { current ->
+                current.copy(
+                    exposants = exposants,
+                    currentPage = ExposantsPage.LIST,
+                    selectedExposantId = null
+                )
+            }
+        }
+    }
+}
