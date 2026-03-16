@@ -26,6 +26,7 @@ import androidx.navigation3.ui.NavDisplay
 import com.example.clicker.ui.screens.login.LoginScreen
 import com.example.clicker.ui.screens.register.RegisterScreen
 import com.example.clicker.ui.theme.PrimaryYellow
+import com.example.clicker.ui.screens.exposants.ExposantsScreen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -157,9 +158,9 @@ fun ClickerNavHost() {
                     }
 
                     Destination.EXPOSANTS -> NavEntry(key) {
-                        Box(modifier = Modifier.padding(innerPadding)) {
-                            Text("Exposants")
-                        }
+                        ExposantsScreen(
+                            modifier = Modifier.padding(innerPadding)
+                        )
                     }
 
                     else -> NavEntry(key) {
