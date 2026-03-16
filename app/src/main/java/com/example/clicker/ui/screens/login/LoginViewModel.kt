@@ -7,9 +7,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.clicker.TAG
 import com.example.clicker.data.auth.AuthRepository
+import com.example.clicker.data.datastore.SessionPreferencesRepository
+import com.example.clicker.data.network.SessionCookieHolder
 import kotlinx.coroutines.launch
 
-class LoginViewModel(private val authRepository: AuthRepository) : ViewModel() {
+class LoginViewModel(
+    private val authRepository: AuthRepository,
+    private val sessionPreferencesRepository: SessionPreferencesRepository
+) : ViewModel() {
 
     private val loginTextState = mutableStateOf("")
     val loginText: State<String> = loginTextState
@@ -41,14 +46,47 @@ class LoginViewModel(private val authRepository: AuthRepository) : ViewModel() {
         viewModelScope.launch {
             internalState.value = LoginUiState.Loading
             try {
-                val response = authRepository.login(login, password)
-                Log.d(TAG, "Connexion réussie pour : ${response.user.login}")
-                internalState.value = LoginUiState.Success(response.user)
+                val result = authRepository.login(login, password)
+
+                val cookie = result.cookie
+                if (cookie.isNullOrBlank()) {
+                    throw Exception("Cookie de session absent dans la réponse")
+                }
+
+                SessionCookieHolder.cookie = cookie
+                sessionPreferencesRepository.saveSession(cookie)
+
+                Log.d(TAG, "Connexion réussie pour : ${result.response.user.login}")
+                internalState.value = LoginUiState.Success(result.response.user)
+
+                onSuccessNavigate()
             } catch (e: Exception) {
                 Log.e(TAG, "Erreur de connexion", e)
                 internalState.value =
                     LoginUiState.Error("Échec de connexion " + (e.message ?: ""))
             }
+        }
+    }
+
+    fun restoreSessionIfNeeded(
+        onSessionFound: () -> Unit
+    ) {
+        viewModelScope.launch {
+            sessionPreferencesRepository.sessionCookie.collect { savedCookie ->
+                if (!savedCookie.isNullOrBlank()) {
+                    SessionCookieHolder.cookie = savedCookie
+                    onSessionFound()
+                }
+            }
+        }
+    }
+
+    fun logout(onLoggedOut: () -> Unit) {
+        viewModelScope.launch {
+            SessionCookieHolder.cookie = null
+            sessionPreferencesRepository.clearSession()
+            internalState.value = LoginUiState.Idle
+            onLoggedOut()
         }
     }
 }
