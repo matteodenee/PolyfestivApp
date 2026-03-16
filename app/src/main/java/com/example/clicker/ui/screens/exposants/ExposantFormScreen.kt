@@ -171,8 +171,11 @@ private fun ExposantTextField(
         shape = RoundedCornerShape(16.dp),
         minLines = minLines,
         colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = AccentBlue,
-            unfocusedBorderColor = BorderLilac
-        )
+        focusedTextColor = MaterialTheme.colorScheme.onSurface,
+        unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+        focusedBorderColor = MaterialTheme.colorScheme.primary,
+        unfocusedBorderColor = MaterialTheme.colorScheme.primary,
+        cursorColor = MaterialTheme.colorScheme.primary
+    )
     )
 }

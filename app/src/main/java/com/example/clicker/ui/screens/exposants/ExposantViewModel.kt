@@ -57,125 +57,57 @@ class ExposantViewModel(
         }
     }
 
-    fun openDetails(exposantId: Int) {
-        _uiState.update { current ->
-            current.copy(
-                selectedExposantId = exposantId,
-                currentPage = ExposantsPage.DETAIL
-            )
-        }
-    }
-
-    fun openCreateForm() {
-        _uiState.update { current ->
-            current.copy(
-                currentPage = ExposantsPage.FORM,
-                formMode = ExposantFormMode.CREATE,
-                selectedExposantId = null
-            )
-        }
-    }
-
-    fun openEditForm() {
-        _uiState.update { current ->
-            current.copy(
-                currentPage = ExposantsPage.FORM,
-                formMode = ExposantFormMode.EDIT
-            )
-        }
-    }
-
-    fun back() {
-        when (_uiState.value.currentPage) {
-            ExposantsPage.LIST -> Unit
-
-            ExposantsPage.DETAIL -> {
-                _uiState.update { current ->
-                    current.copy(
-                        currentPage = ExposantsPage.LIST,
-                        selectedExposantId = null
-                    )
-                }
-            }
-
-            ExposantsPage.FORM -> {
-                _uiState.update { current ->
-                    current.copy(
-                        currentPage = if (current.formMode == ExposantFormMode.EDIT) {
-                            ExposantsPage.DETAIL
-                        } else {
-                            ExposantsPage.LIST
-                        }
-                    )
-                }
-            }
-        }
-    }
-
-    fun saveExposant(formData: ExposantFormData) {
+    fun saveNewExposant(formData: ExposantFormData) {
         viewModelScope.launch {
             val role = formData.role.trim().uppercase().ifBlank { "PUBLISHER" }
-            val actorTypes = listOf(role)
 
-            if (_uiState.value.formMode == ExposantFormMode.CREATE) {
-                val newExposant = Exposant(
-                    id = 0,
-                    name = formData.name.trim(),
-                    actorType = actorTypes,
-                    phone = formData.phone.trim().ifBlank { null },
-                    email = formData.email.trim().ifBlank { null },
-                    description = formData.description.trim().ifBlank { null }
-                )
+            val newExposant = Exposant(
+                id = 0,
+                name = formData.name.trim(),
+                actorType = listOf(role),
+                phone = formData.phone.trim().ifBlank { null },
+                email = formData.email.trim().ifBlank { null },
+                description = formData.description.trim().ifBlank { null }
+            )
 
-                repository.addExposant(newExposant)
-                val exposants = repository.getExposants()
-
-                _uiState.update { current ->
-                    current.copy(
-                        exposants = exposants,
-                        currentPage = ExposantsPage.LIST,
-                        formMode = ExposantFormMode.CREATE,
-                        selectedExposantId = null
-                    )
-                }
-            } else {
-                val selected = _uiState.value.selectedExposant ?: return@launch
-
-                val updatedExposant = selected.copy(
-                    name = formData.name.trim(),
-                    actorType = actorTypes,
-                    phone = formData.phone.trim().ifBlank { null },
-                    email = formData.email.trim().ifBlank { null },
-                    description = formData.description.trim().ifBlank { null }
-                )
-
-                repository.updateExposant(updatedExposant)
-                val exposants = repository.getExposants()
-
-                _uiState.update { current ->
-                    current.copy(
-                        exposants = exposants,
-                        currentPage = ExposantsPage.DETAIL
-                    )
-                }
-            }
+            repository.addExposant(newExposant)
+            refreshExposants()
         }
     }
 
-    fun deleteSelectedExposant() {
-        val selectedId = _uiState.value.selectedExposantId ?: return
-
+    fun updateExposant(exposantId: Int, formData: ExposantFormData) {
         viewModelScope.launch {
-            repository.deleteExposant(selectedId)
-            val exposants = repository.getExposants()
+            val currentExposant = repository.getExposantById(exposantId) ?: return@launch
+            val role = formData.role.trim().uppercase().ifBlank { "PUBLISHER" }
 
-            _uiState.update { current ->
-                current.copy(
-                    exposants = exposants,
-                    currentPage = ExposantsPage.LIST,
-                    selectedExposantId = null
-                )
-            }
+            val updatedExposant = currentExposant.copy(
+                name = formData.name.trim(),
+                actorType = listOf(role),
+                phone = formData.phone.trim().ifBlank { null },
+                email = formData.email.trim().ifBlank { null },
+                description = formData.description.trim().ifBlank { null }
+            )
+
+            repository.updateExposant(updatedExposant)
+            refreshExposants()
+        }
+    }
+
+    fun deleteExposantById(exposantId: Int) {
+        viewModelScope.launch {
+            repository.deleteExposant(exposantId)
+            refreshExposants()
+        }
+    }
+
+    private suspend fun refreshExposants() {
+        val exposants = repository.getExposants()
+        _uiState.update { current ->
+            current.copy(
+                isLoading = false,
+                exposants = exposants,
+                errorMessage = null
+            )
         }
     }
 }

@@ -2,15 +2,15 @@ package com.example.clicker.ui.screens.exposants
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Search
@@ -26,25 +26,30 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.clicker.data.model.Exposant
 import com.example.clicker.ui.theme.AccentBlue
 import com.example.clicker.ui.theme.BackgroundCream
 import com.example.clicker.ui.theme.BorderLilac
-import com.example.clicker.ui.theme.PrimaryYellow
-import androidx.compose.ui.unit.dp
 
 @Composable
 fun ExposantsScreen(
     modifier: Modifier = Modifier,
-    exposantViewModel: ExposantViewModel = viewModel()
+    exposantViewModel: ExposantViewModel = viewModel(),
+    onAddClick: () -> Unit,
+    onDetailsClick: (Int) -> Unit
 ) {
     val uiState by exposantViewModel.uiState.collectAsState()
 
     when {
         uiState.isLoading -> {
-            Box(
+            androidx.compose.foundation.layout.Box(
                 modifier = modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
@@ -53,7 +58,7 @@ fun ExposantsScreen(
         }
 
         uiState.errorMessage != null -> {
-            Box(
+            androidx.compose.foundation.layout.Box(
                 modifier = modifier
                     .fillMaxSize()
                     .padding(16.dp),
@@ -64,41 +69,15 @@ fun ExposantsScreen(
         }
 
         else -> {
-            when (uiState.currentPage) {
-                ExposantsPage.LIST -> {
-                    ExposantsListContent(
-                        searchQuery = uiState.searchQuery,
-                        exposantsCount = uiState.filteredExposants.size,
-                        onSearchQueryChange = exposantViewModel::onSearchQueryChange,
-                        onAddClick = exposantViewModel::openCreateForm,
-                        onDetailsClick = exposantViewModel::openDetails,
-                        exposants = uiState.filteredExposants,
-                        modifier = modifier
-                    )
-                }
-
-                ExposantsPage.DETAIL -> {
-                    uiState.selectedExposant?.let { exposant ->
-                        DetailsExposantScreen(
-                            exposant = exposant,
-                            onBackClick = exposantViewModel::back,
-                            onEditClick = exposantViewModel::openEditForm,
-                            onDeleteClick = exposantViewModel::deleteSelectedExposant,
-                            modifier = modifier
-                        )
-                    }
-                }
-
-                ExposantsPage.FORM -> {
-                    ExposantFormScreen(
-                        mode = uiState.formMode,
-                        exposant = uiState.selectedExposant,
-                        onBackClick = exposantViewModel::back,
-                        onSaveClick = exposantViewModel::saveExposant,
-                        modifier = modifier
-                    )
-                }
-            }
+            ExposantsListContent(
+                searchQuery = uiState.searchQuery,
+                exposantsCount = uiState.filteredExposants.size,
+                exposants = uiState.filteredExposants,
+                onSearchQueryChange = exposantViewModel::onSearchQueryChange,
+                onAddClick = onAddClick,
+                onDetailsClick = onDetailsClick,
+                modifier = modifier
+            )
         }
     }
 }
@@ -107,35 +86,29 @@ fun ExposantsScreen(
 private fun ExposantsListContent(
     searchQuery: String,
     exposantsCount: Int,
-    exposants: List<com.example.clicker.data.model.Exposant>,
+    exposants: List<Exposant>,
     onSearchQueryChange: (String) -> Unit,
     onAddClick: () -> Unit,
     onDetailsClick: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val scrollState = rememberScrollState()
+    var showAll by remember { mutableStateOf(false) }
+
+    val displayedExposants = when {
+        searchQuery.isNotBlank() -> exposants
+        showAll -> exposants
+        else -> exposants.take(10)
+    }
+
     Column(
         modifier = modifier
             .fillMaxSize()
             .background(BackgroundCream)
-            .padding(horizontal = 16.dp, vertical = 12.dp),
+            .verticalScroll(scrollState)
+            .padding(horizontal = 16.dp, vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(170.dp)
-                .background(
-                    color = PrimaryYellow,
-                    shape = RoundedCornerShape(24.dp)
-                ),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = "Festival des exposants",
-                style = MaterialTheme.typography.headlineSmall
-            )
-        }
-
         Button(
             onClick = onAddClick,
             modifier = Modifier.fillMaxWidth(),
@@ -178,16 +151,18 @@ private fun ExposantsListContent(
         )
 
         ListeExposants(
-            exposants = exposants,
+            exposants = displayedExposants,
             onDetailsClick = onDetailsClick,
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.fillMaxWidth()
         )
 
-        TextButton(
-            onClick = { },
-            modifier = Modifier.align(Alignment.CenterHorizontally)
-        ) {
-            Text("View All Actors")
+        if (searchQuery.isBlank() && !showAll && exposants.size > 10) {
+            TextButton(
+                onClick = { showAll = true },
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+            ) {
+                Text("View All Actors")
+            }
         }
     }
 }

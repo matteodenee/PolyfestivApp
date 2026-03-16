@@ -2,25 +2,11 @@ package com.example.clicker.ui.screens.exposants
 
 import com.example.clicker.data.model.Exposant
 
-enum class ExposantsPage {
-    LIST,
-    DETAIL,
-    FORM,
-}
-
-enum class ExposantFormMode {
-    CREATE,
-    EDIT,
-}
-
 data class ExposantUiState(
     val isLoading: Boolean = true,
     val exposants: List<Exposant> = emptyList(),
     val searchQuery: String = "",
-    val selectedExposantId: Int? = null,
-    val currentPage: ExposantsPage = ExposantsPage.LIST,
-    val formMode: ExposantFormMode = ExposantFormMode.CREATE,
-    val errorMessage: String? = null,
+    val errorMessage: String? = null
 ) {
     val filteredExposants: List<Exposant>
         get() {
@@ -33,6 +19,7 @@ data class ExposantUiState(
             }
         }
 
-    val selectedExposant: Exposant?
-        get() = exposants.firstOrNull { it.id == selectedExposantId }
+    fun findExposantById(id: Int): Exposant? {
+        return exposants.firstOrNull { it.id == id }
+    }
 }
