@@ -23,7 +23,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.ui.NavDisplay
-import com.example.clicker.ui.screens.festivals.FestivalsScreen
 import com.example.clicker.ui.screens.login.LoginScreen
 import com.example.clicker.ui.screens.register.RegisterScreen
 import com.example.clicker.ui.theme.PrimaryYellow
@@ -147,7 +146,7 @@ fun ClickerNavHost() {
 
                     Destination.FESTIVALS -> NavEntry(key) {
                         Box(modifier = Modifier.padding(innerPadding)) {
-                            FestivalsScreen()
+                            Text("Festival")
                         }
                     }
 
