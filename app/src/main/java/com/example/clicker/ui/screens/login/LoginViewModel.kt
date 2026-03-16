@@ -9,6 +9,7 @@ import com.example.clicker.TAG
 import com.example.clicker.data.auth.AuthRepository
 import com.example.clicker.data.datastore.SessionPreferencesRepository
 import com.example.clicker.data.network.SessionCookieHolder
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 class LoginViewModel(
@@ -48,13 +49,17 @@ class LoginViewModel(
             try {
                 val result = authRepository.login(login, password)
 
-                val cookie = result.cookie
-                if (cookie.isNullOrBlank()) {
-                    throw Exception("Cookie de session absent dans la réponse")
+                val accessCookie = result.accessCookie
+                val refreshCookie = result.refreshCookie
+
+                if (accessCookie.isNullOrBlank() || refreshCookie.isNullOrBlank()) {
+                    throw Exception("Cookies de session absents dans la réponse")
                 }
 
-                SessionCookieHolder.cookie = cookie
-                sessionPreferencesRepository.saveSession(cookie)
+                SessionCookieHolder.accessCookie = accessCookie
+                SessionCookieHolder.refreshCookie = refreshCookie
+
+                sessionPreferencesRepository.saveSession(accessCookie, refreshCookie)
 
                 Log.d(TAG, "Connexion réussie pour : ${result.response.user.login}")
                 internalState.value = LoginUiState.Success(result.response.user)
@@ -70,15 +75,41 @@ class LoginViewModel(
 
     fun restoreSessionIfNeeded(onSessionFound: () -> Unit) {
         viewModelScope.launch {
-            sessionPreferencesRepository.sessionCookie.collect { savedCookie ->
+            val savedAccessCookie = sessionPreferencesRepository.accessCookie.first()
+            val savedRefreshCookie = sessionPreferencesRepository.refreshCookie.first()
 
-                if (savedCookie.isNullOrBlank()) {
-                    Log.d(TAG, "Aucune session sauvegardée")
-                } else {
-                    Log.d(TAG, "Session restaurée avec cookie : $savedCookie")
+            if (savedAccessCookie.isNullOrBlank() || savedRefreshCookie.isNullOrBlank()) {
+                Log.d(TAG, "Aucune session sauvegardée")
+                return@launch
+            }
 
-                    SessionCookieHolder.cookie = savedCookie
+            Log.d(TAG, "Cookies trouvés dans DataStore")
+
+            SessionCookieHolder.accessCookie = savedAccessCookie
+            SessionCookieHolder.refreshCookie = savedRefreshCookie
+
+            val sessionValid = authRepository.checkSession()
+
+            if (sessionValid) {
+                Log.d(TAG, "Session valide avec access token actuel")
+                onSessionFound()
+            } else {
+                Log.d(TAG, "Access token expiré, tentative de refresh")
+
+                val newAccessCookie = authRepository.refreshSession()
+
+                if (!newAccessCookie.isNullOrBlank()) {
+                    SessionCookieHolder.accessCookie = newAccessCookie
+                    sessionPreferencesRepository.updateAccessCookie(newAccessCookie)
+
+                    Log.d(TAG, "Session restaurée après refresh")
                     onSessionFound()
+                } else {
+                    Log.d(TAG, "Refresh expiré ou invalide, suppression de la session")
+
+                    SessionCookieHolder.accessCookie = null
+                    SessionCookieHolder.refreshCookie = null
+                    sessionPreferencesRepository.clearSession()
                 }
             }
         }
@@ -86,7 +117,8 @@ class LoginViewModel(
 
     fun logout(onLoggedOut: () -> Unit) {
         viewModelScope.launch {
-            SessionCookieHolder.cookie = null
+            SessionCookieHolder.accessCookie = null
+            SessionCookieHolder.refreshCookie = null
             sessionPreferencesRepository.clearSession()
             internalState.value = LoginUiState.Idle
             onLoggedOut()
