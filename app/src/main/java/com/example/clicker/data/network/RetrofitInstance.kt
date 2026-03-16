@@ -16,19 +16,23 @@ object RetrofitInstance {
         ignoreUnknownKeys = true
     }
 
-    // Interceptor qui va s'exécuter avant chaque requête envoyée au serveur
+    // Interceptor exécuté avant chaque requête envoyée au serveur
     private val authCookieInterceptor = Interceptor { chain ->
-        // On récupère la requête qui allait être envoyée
+        // On récupère la requête originale qui va être envoyée
         val originalRequest = chain.request()
         // On crée une copie modifiable de cette requête
         val requestBuilder = originalRequest.newBuilder()
-        // Si un cookie de session existe
-        SessionCookieHolder.cookie?.let { cookieValue ->
-            // On ajoute le cookie dans les headers de la requête
-            // Cela permet au serveur de reconnaître l'utilisateur
-            requestBuilder.addHeader("Cookie", cookieValue.substringBefore(";"))
+        // On récupère les cookies stockés en mémoire (access_token et refresh_token)
+        val cookies = listOfNotNull(
+            SessionCookieHolder.accessCookie,
+            SessionCookieHolder.refreshCookie
+        )
+        // Si au moins un cookie existe
+        if (cookies.isNotEmpty()) {
+            // On ajoute les cookies dans le header HTTP "Cookie"
+            requestBuilder.addHeader("Cookie", cookies.joinToString("; "))
         }
-        // On envoie la requête
+        // On envoie la requête au serveur
         chain.proceed(requestBuilder.build())
     }
 
