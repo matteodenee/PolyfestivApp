@@ -26,11 +26,25 @@ import androidx.navigation3.ui.NavDisplay
 import com.example.clicker.ui.screens.login.LoginScreen
 import com.example.clicker.ui.screens.register.RegisterScreen
 import com.example.clicker.ui.theme.PrimaryYellow
+import androidx.compose.runtime.LaunchedEffect
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.clicker.ui.screens.login.LoginViewModel
+import com.example.clicker.ui.viewmodel.AppViewModelProvider
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ClickerNavHost() {
+fun ClickerNavHost(
+    loginViewModel: LoginViewModel = viewModel(factory = AppViewModelProvider.Factory)
+) {
     val backStack = remember { mutableStateListOf<Any>(AppRoutes.LOGIN) }
+
+    LaunchedEffect(Unit) {
+        loginViewModel.restoreSessionIfNeeded {
+            backStack.clear()
+            backStack.add(Destination.FESTIVALS)
+        }
+    }
+
     val currentDestination = backStack.lastOrNull()
     val showBars = currentDestination is Destination
 

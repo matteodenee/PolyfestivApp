@@ -13,7 +13,8 @@ object AppViewModelProvider {
     val Factory = viewModelFactory {
         initializer {
             LoginViewModel(
-                clickerApplication().container.authRepository
+                clickerApplication().container.authRepository,
+                clickerApplication().sessionPreferencesRepository
             )
         }
         initializer {

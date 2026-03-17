@@ -2,13 +2,11 @@ package com.example.clicker.data.network
 
 import com.example.clicker.data.auth.AuthApiService
 import kotlinx.serialization.json.Json
-import okhttp3.JavaNetCookieJar
+import okhttp3.Interceptor
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
-import java.net.CookieManager
-import java.net.CookiePolicy
 
 object RetrofitInstance {
 
@@ -18,12 +16,28 @@ object RetrofitInstance {
         ignoreUnknownKeys = true
     }
 
-    private val cookieManager = CookieManager().apply {
-        setCookiePolicy(CookiePolicy.ACCEPT_ALL)
+    // Interceptor exécuté avant chaque requête envoyée au serveur
+    private val authCookieInterceptor = Interceptor { chain ->
+        // On récupère la requête originale qui va être envoyée
+        val originalRequest = chain.request()
+        // On crée une copie modifiable de cette requête
+        val requestBuilder = originalRequest.newBuilder()
+        // On récupère les cookies stockés en mémoire (access_token et refresh_token)
+        val cookies = listOfNotNull(
+            SessionCookieHolder.accessCookie,
+            SessionCookieHolder.refreshCookie
+        )
+        // Si au moins un cookie existe
+        if (cookies.isNotEmpty()) {
+            // On ajoute les cookies dans le header HTTP "Cookie"
+            requestBuilder.addHeader("Cookie", cookies.joinToString("; "))
+        }
+        // On envoie la requête au serveur
+        chain.proceed(requestBuilder.build())
     }
 
     private val okHttpClient = OkHttpClient.Builder()
-        .cookieJar(JavaNetCookieJar(cookieManager))
+        .addInterceptor(authCookieInterceptor)
         .build()
 
     val api: AuthApiService by lazy {
