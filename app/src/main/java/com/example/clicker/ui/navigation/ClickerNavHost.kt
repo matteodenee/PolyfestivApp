@@ -36,7 +36,9 @@ import com.example.clicker.ui.screens.games.GamesScreen
 import com.example.clicker.ui.screens.login.LoginScreen
 import com.example.clicker.ui.screens.login.LoginViewModel
 import com.example.clicker.ui.screens.register.RegisterScreen
-import com.example.clicker.ui.screens.festival.FestivalScreen
+import com.example.clicker.ui.screens.festivalList.FestivalScreen
+import com.example.clicker.ui.screens.festivalDetail.FestivalDetailScreen
+import com.example.clicker.ui.screens.festivalEdit.FestivalEditScreen
 import com.example.clicker.ui.theme.PrimaryYellow
 import com.example.clicker.ui.viewmodel.AppViewModelProvider
 
@@ -80,6 +82,8 @@ fun ClickerNavHost(
                                 AppRoutes.GameCreateRoute -> "Ajout"
                                 is AppRoutes.GameDetailRoute -> "Détail"
                                 is AppRoutes.GameEditRoute -> "Modification"
+                                is AppRoutes.FestivalDetailRoute -> "Détail Festival"
+                                is AppRoutes.FestivalEditRoute -> "Modification Festival"
                                 else -> "Clicker"
                             }
                         )
@@ -179,8 +183,7 @@ fun ClickerNavHost(
                             FestivalScreen(
                                 refreshKey = festivalsRefreshKey,
                                 onFestivalClick = { festivalId ->
-                                    // Navigate to festival details if needed, for now just log or stay here
-                                    Log.d("NAV", "Click on festival $festivalId")
+                                    backStack.add(AppRoutes.FestivalDetailRoute(festivalId))
                                 }
                             )
                         }
@@ -246,6 +249,35 @@ fun ClickerNavHost(
                         }
                     }
 
+                    is AppRoutes.FestivalDetailRoute -> NavEntry(key) {
+                        Box(modifier = Modifier.padding(innerPadding)) {
+                            FestivalDetailScreen(
+                                festivalId = key.festivalId,
+                                refreshKey = detailRefreshKey,
+                                onEditClick = { festivalId ->
+                                    backStack.add(AppRoutes.FestivalEditRoute(festivalId))
+                                },
+                                onDeleteSuccess = {
+                                    festivalsRefreshKey++
+                                    backStack.removeLastOrNull()
+                                }
+                            )
+                        }
+                    }
+
+                    is AppRoutes.FestivalEditRoute -> NavEntry(key) {
+                        Box(modifier = Modifier.padding(innerPadding)) {
+                            FestivalEditScreen(
+                                festivalId = key.festivalId,
+                                onEditSuccess = {
+                                    festivalsRefreshKey++
+                                    detailRefreshKey++
+                                    backStack.removeLastOrNull()
+                                }
+                            )
+                        }
+                    }
+
                     else -> NavEntry(key) {
                         Box(modifier = Modifier.padding(innerPadding)) {
                             Text("Erreur")
@@ -263,6 +295,10 @@ private fun isDestinationSelected(currentDestination: Any?, destination: Destina
                 currentDestination == AppRoutes.GameCreateRoute ||
                 currentDestination is AppRoutes.GameDetailRoute ||
                 currentDestination is AppRoutes.GameEditRoute
+
+        Destination.FESTIVALS -> currentDestination == Destination.FESTIVALS ||
+                currentDestination is AppRoutes.FestivalDetailRoute ||
+                currentDestination is AppRoutes.FestivalEditRoute
 
         else -> currentDestination == destination
     }

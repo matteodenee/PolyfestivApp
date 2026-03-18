@@ -1,6 +1,5 @@
-package com.example.clicker.ui.screens.festival
+package com.example.clicker.ui.screens.festivalList
 
-import android.util.Log
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -60,7 +59,7 @@ fun FestivalScreen(
     refreshKey: Int,
     onFestivalClick: (Int) -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: FestivalViewModel = viewModel(
+    viewModel: FestivalListViewModel = viewModel(
         factory = AppViewModelProvider.Factory
     )
 ) {
@@ -131,7 +130,7 @@ fun FestivalScreen(
             Spacer(modifier = Modifier.height(14.dp))
 
             when (val uiState = state) {
-                is FestivalUiState.Loading -> {
+                is FestivalListUiState.Loading -> {
                     Box(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
@@ -140,14 +139,14 @@ fun FestivalScreen(
                     }
                 }
 
-                is FestivalUiState.Error -> {
+                is FestivalListUiState.Error -> {
                     Text(
                         text = uiState.message,
                         color = MaterialTheme.colorScheme.error
                     )
                 }
 
-                is FestivalUiState.Success -> {
+                is FestivalListUiState.Success -> {
                     val filteredFestivals = uiState.festivals.filter { festival ->
                         val query = searchQuery.trim().lowercase()
                         query.isBlank() ||
