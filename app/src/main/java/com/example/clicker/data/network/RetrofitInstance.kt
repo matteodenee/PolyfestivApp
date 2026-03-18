@@ -1,6 +1,7 @@
 package com.example.clicker.data.network
 
 import com.example.clicker.data.auth.AuthApiService
+import com.example.clicker.data.remote.api.ExposantApiService
 import kotlinx.serialization.json.Json
 import okhttp3.JavaNetCookieJar
 import okhttp3.MediaType.Companion.toMediaType
@@ -26,7 +27,7 @@ object RetrofitInstance {
         .cookieJar(JavaNetCookieJar(cookieManager))
         .build()
 
-    val api: AuthApiService by lazy {
+    private val retrofit: Retrofit by lazy {
         Retrofit.Builder()
             .baseUrl(BASE_URL)
             .client(okHttpClient)
@@ -34,6 +35,13 @@ object RetrofitInstance {
                 json.asConverterFactory("application/json; charset=utf-8".toMediaType())
             )
             .build()
-            .create(AuthApiService::class.java)
+    }
+
+    val authApi: AuthApiService by lazy {
+        retrofit.create(AuthApiService::class.java)
+    }
+
+    val exposantApi: ExposantApiService by lazy {
+        retrofit.create(ExposantApiService::class.java)
     }
 }

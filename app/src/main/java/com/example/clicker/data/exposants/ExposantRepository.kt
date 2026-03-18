@@ -1,12 +1,12 @@
 package com.example.clicker.data.repository
 
 import com.example.clicker.data.model.Exposant
+import com.example.clicker.data.network.RetrofitInstance
 import com.example.clicker.data.remote.api.ExposantApiService
-import com.example.clicker.data.remote.dto.ActorRequest
 import com.example.clicker.data.remote.dto.ActorDto
+import com.example.clicker.data.remote.dto.ActorRequest
 import kotlinx.coroutines.delay
 import retrofit2.HttpException
-import retrofit2.Response
 
 interface ExposantRepository {
     suspend fun getExposants(): List<Exposant>
@@ -120,7 +120,7 @@ class RemoteExposantRepository(
 
 object ExposantRepositoryProvider {
     val repository: ExposantRepository by lazy {
-        RemoteExposantRepository(ExposantApiService.create())
+        RemoteExposantRepository(RetrofitInstance.exposantApi)
         // Pour repasser en local si besoin :
         // FakeExposantRepository()
     }
