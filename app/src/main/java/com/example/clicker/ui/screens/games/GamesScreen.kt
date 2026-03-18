@@ -50,6 +50,11 @@ import com.example.clicker.R
 import com.example.clicker.data.game.GameDto
 import com.example.clicker.ui.viewmodel.AppViewModelProvider
 import com.example.clicker.ui.theme.SearchField
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Dp
+import androidx.compose.animation.core.animateDpAsState
 
 
 @Composable
@@ -70,12 +75,42 @@ fun GamesScreen(
     var searchQuery by remember { mutableStateOf("") }
     val colors = MaterialTheme.colorScheme
 
+    val listState = rememberLazyListState()// permet de savoir à quelle position on est dans la liste
+
+    val maxHeaderHeight = 215.dp
+    val minHeaderHeight = 90.dp
+    val density = LocalDensity.current
+
+
+    val targetHeaderHeight by remember {// hauteur cible du header
+        derivedStateOf {
+            // Si on a scrollé au-delà du premier élément
+            if (listState.firstVisibleItemIndex > 0) {
+                // On bloque directement à la hauteur minimale
+                minHeaderHeight
+            } else {
+                // Sinon, on est encore sur le premier item donc on réduit progressivement le header
+                val scrollOffsetPx = listState.firstVisibleItemScrollOffset
+                val scrollOffsetDp = with(density) { scrollOffsetPx.toDp() }
+                // Calcul de la nouvelle hauteur :
+                (maxHeaderHeight - scrollOffsetDp)
+                    .coerceAtLeast(minHeaderHeight)
+            }
+        }
+    }
+
+    // Animation de la hauteur du header
+    val headerHeight by animateDpAsState(
+        targetValue = targetHeaderHeight,
+        label = "headerHeight"
+    )
+
     Column(
         modifier = modifier
             .fillMaxSize()
             .background(colors.background)
     ) {
-        HeaderSection()
+        HeaderSection(height = headerHeight)
 
         Column(
             modifier = Modifier
@@ -152,7 +187,10 @@ fun GamesScreen(
                                 game.author.lowercase().contains(query)
                     }
 
-                    LazyColumn(modifier = Modifier.weight(1f)) {
+                    LazyColumn(
+                        state = listState,
+                        modifier = Modifier.weight(1f)
+                    ) {
                         items(filteredGames) { game ->
                             GameItem(
                                 game = game,
@@ -167,11 +205,11 @@ fun GamesScreen(
 }
 
 @Composable
-private fun HeaderSection() {
+private fun HeaderSection(height: Dp) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(215.dp)
+            .height(height)
     ) {
         Image(
             painter = painterResource(R.drawable.games_header),
