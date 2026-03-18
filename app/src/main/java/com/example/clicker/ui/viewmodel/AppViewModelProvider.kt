@@ -14,7 +14,6 @@ import com.example.clicker.ui.screens.login.LoginViewModel
 import com.example.clicker.ui.screens.register.RegisterViewModel
 import com.example.clicker.ui.screens.festivalList.FestivalListViewModel
 import com.example.clicker.ui.screens.festivalDetail.FestivalDetailViewModel
-import com.example.clicker.ui.screens.festivalEdit.FestivalEditViewModel
 
 object AppViewModelProvider {
     val Factory = viewModelFactory {
@@ -61,12 +60,6 @@ object AppViewModelProvider {
 
         initializer {
             FestivalDetailViewModel(
-                clickerApplication().container.festivalsRepository
-            )
-        }
-
-        initializer {
-            FestivalEditViewModel(
                 clickerApplication().container.festivalsRepository
             )
         }

@@ -38,7 +38,6 @@ import com.example.clicker.ui.screens.login.LoginViewModel
 import com.example.clicker.ui.screens.register.RegisterScreen
 import com.example.clicker.ui.screens.festivalList.FestivalScreen
 import com.example.clicker.ui.screens.festivalDetail.FestivalDetailScreen
-import com.example.clicker.ui.screens.festivalEdit.FestivalEditScreen
 import com.example.clicker.ui.theme.PrimaryYellow
 import com.example.clicker.ui.viewmodel.AppViewModelProvider
 
@@ -259,19 +258,6 @@ fun ClickerNavHost(
                                 },
                                 onDeleteSuccess = {
                                     festivalsRefreshKey++
-                                    backStack.removeLastOrNull()
-                                }
-                            )
-                        }
-                    }
-
-                    is AppRoutes.FestivalEditRoute -> NavEntry(key) {
-                        Box(modifier = Modifier.padding(innerPadding)) {
-                            FestivalEditScreen(
-                                festivalId = key.festivalId,
-                                onEditSuccess = {
-                                    festivalsRefreshKey++
-                                    detailRefreshKey++
                                     backStack.removeLastOrNull()
                                 }
                             )
