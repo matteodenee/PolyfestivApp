@@ -18,17 +18,24 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.ui.NavDisplay
+import com.example.clicker.ui.screens.gameCreate.GameCreateScreen
+import com.example.clicker.ui.screens.gameDetail.GameDetailScreen
+import com.example.clicker.ui.screens.gameEdit.GameEditScreen
+import com.example.clicker.ui.screens.games.GamesScreen
 import com.example.clicker.ui.screens.login.LoginScreen
+import com.example.clicker.ui.screens.login.LoginViewModel
 import com.example.clicker.ui.screens.register.RegisterScreen
 import com.example.clicker.ui.theme.PrimaryYellow
-import androidx.compose.runtime.LaunchedEffect
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.clicker.ui.screens.login.LoginViewModel
 import com.example.clicker.ui.viewmodel.AppViewModelProvider
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -38,6 +45,9 @@ fun ClickerNavHost(
 ) {
     val backStack = remember { mutableStateListOf<Any>(AppRoutes.LOGIN) }
 
+    var gamesRefreshKey by remember { mutableIntStateOf(0) }
+    var detailRefreshKey by remember { mutableIntStateOf(0) }
+
     LaunchedEffect(Unit) {
         loginViewModel.restoreSessionIfNeeded {
             backStack.clear()
@@ -46,12 +56,12 @@ fun ClickerNavHost(
     }
 
     val currentDestination = backStack.lastOrNull()
-    val showBars = currentDestination is Destination
+    val shouldDisplayBars = currentDestination !in listOf(AppRoutes.LOGIN, AppRoutes.REGISTER)
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
-            if (showBars) {
+            if (shouldDisplayBars) {
                 CenterAlignedTopAppBar(
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = MaterialTheme.colorScheme.primary,
@@ -64,6 +74,9 @@ fun ClickerNavHost(
                                 Destination.FESTIVALS -> "Festivals"
                                 Destination.JEUX -> "Jeux"
                                 Destination.EXPOSANTS -> "Exposants"
+                                AppRoutes.GameCreateRoute -> "Ajout"
+                                is AppRoutes.GameDetailRoute -> "Détail"
+                                is AppRoutes.GameEditRoute -> "Modification"
                                 else -> "Clicker"
                             }
                         )
@@ -86,7 +99,7 @@ fun ClickerNavHost(
             }
         },
         bottomBar = {
-            if (showBars) {
+            if (shouldDisplayBars) {
                 BottomAppBar(
                     containerColor = MaterialTheme.colorScheme.primary
                 ) {
@@ -95,9 +108,9 @@ fun ClickerNavHost(
                     ) {
                         Destination.entries.forEach { destination ->
                             NavigationBarItem(
-                                selected = currentDestination == destination,
+                                selected = isDestinationSelected(currentDestination, destination),
                                 onClick = {
-                                    if (currentDestination != destination) {
+                                    if (!isDestinationSelected(currentDestination, destination)) {
                                         backStack.add(destination)
                                     }
                                 },
@@ -166,13 +179,61 @@ fun ClickerNavHost(
 
                     Destination.JEUX -> NavEntry(key) {
                         Box(modifier = Modifier.padding(innerPadding)) {
-                            Text("Jeux")
+                            GamesScreen(
+                                refreshKey = gamesRefreshKey,
+                                onGameClick = { gameId ->
+                                    backStack.add(AppRoutes.GameDetailRoute(gameId))
+                                },
+                                onAddClick = {
+                                    backStack.add(AppRoutes.GameCreateRoute)
+                                }
+                            )
                         }
                     }
 
                     Destination.EXPOSANTS -> NavEntry(key) {
                         Box(modifier = Modifier.padding(innerPadding)) {
                             Text("Exposants")
+                        }
+                    }
+
+                    AppRoutes.GameCreateRoute -> NavEntry(key) {
+                        Box(modifier = Modifier.padding(innerPadding)) {
+                            GameCreateScreen(
+                                onCreateSuccess = {
+                                    gamesRefreshKey++
+                                    backStack.removeLastOrNull()
+                                }
+                            )
+                        }
+                    }
+
+                    is AppRoutes.GameDetailRoute -> NavEntry(key) {
+                        Box(modifier = Modifier.padding(innerPadding)) {
+                            GameDetailScreen(
+                                gameId = key.gameId,
+                                refreshKey = detailRefreshKey,
+                                onEditClick = { gameId ->
+                                    backStack.add(AppRoutes.GameEditRoute(gameId))
+                                },
+                                onDeleteSuccess = {
+                                    gamesRefreshKey++
+                                    backStack.removeLastOrNull()
+                                }
+                            )
+                        }
+                    }
+
+                    is AppRoutes.GameEditRoute -> NavEntry(key) {
+                        Box(modifier = Modifier.padding(innerPadding)) {
+                            GameEditScreen(
+                                gameId = key.gameId,
+                                onEditSuccess = {
+                                    gamesRefreshKey++
+                                    detailRefreshKey++
+                                    backStack.removeLastOrNull()
+                                }
+                            )
                         }
                     }
 
@@ -184,5 +245,16 @@ fun ClickerNavHost(
                 }
             }
         )
+    }
+}
+
+private fun isDestinationSelected(currentDestination: Any?, destination: Destination): Boolean { // dit à la bottom bar quel onglet doit être considéré comme actif
+    return when (destination) {
+        Destination.JEUX -> currentDestination == Destination.JEUX ||
+                currentDestination == AppRoutes.GameCreateRoute ||
+                currentDestination is AppRoutes.GameDetailRoute ||
+                currentDestination is AppRoutes.GameEditRoute
+
+        else -> currentDestination == destination
     }
 }
