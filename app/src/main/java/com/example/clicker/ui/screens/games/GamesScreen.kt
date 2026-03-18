@@ -1,6 +1,7 @@
 package com.example.clicker.ui.screens.games
 
 import android.util.Log
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -17,6 +18,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircleOutline
@@ -32,6 +34,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -41,25 +44,22 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil3.compose.AsyncImage
 import com.example.clicker.R
 import com.example.clicker.data.game.GameDto
-import com.example.clicker.ui.viewmodel.AppViewModelProvider
 import com.example.clicker.ui.theme.SearchField
-import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.Dp
-import androidx.compose.animation.core.animateDpAsState
-
+import com.example.clicker.ui.viewmodel.AppViewModelProvider
 
 @Composable
 fun GamesScreen(
     refreshKey: Int,
+    canAdd: Boolean,
     onAddClick: () -> Unit,
     onGameClick: (Int) -> Unit,
     modifier: Modifier = Modifier,
@@ -80,8 +80,6 @@ fun GamesScreen(
     val maxHeaderHeight = 215.dp
     val minHeaderHeight = 90.dp
     val density = LocalDensity.current
-
-
     val targetHeaderHeight by remember {// hauteur cible du header
         derivedStateOf {
             // Si on a scrollé au-delà du premier élément
@@ -132,6 +130,7 @@ fun GamesScreen(
 
                 Surface(
                     onClick = onAddClick,
+                    enabled = canAdd,
                     color = Color.Transparent
                 ) {
                     Row(
@@ -140,14 +139,24 @@ fun GamesScreen(
                     ) {
                         Text(
                             text = "Ajouter un jeu",
-                            color = colors.onBackground,
+                            color = if (canAdd) {
+                                colors.onBackground
+                            } else { // bouton grisé
+                                colors.onBackground.copy(alpha = 0.4f)
+                            },
                             style = MaterialTheme.typography.bodyLarge
                         )
+
                         Spacer(modifier = Modifier.width(6.dp))
+
                         Icon(
                             imageVector = Icons.Default.AddCircleOutline,
                             contentDescription = "Ajouter un jeu",
-                            tint = colors.onBackground
+                            tint = if (canAdd) {
+                                colors.onBackground
+                            } else {
+                                colors.onBackground.copy(alpha = 0.4f)
+                            }
                         )
                     }
                 }
@@ -333,23 +342,6 @@ private fun GameItem(
                     text = "Auteur: ${game.author}",
                     style = MaterialTheme.typography.bodyMedium.copy(
                         color = colors.onBackground.copy(alpha = 0.8f)
-                    )
-                )
-            }
-
-            Surface(
-                onClick = onClick,
-                shape = RoundedCornerShape(24.dp),
-                color = colors.secondary,
-                tonalElevation = 0.dp,
-                shadowElevation = 4.dp
-            ) {
-                Text(
-                    text = "Détail",
-                    modifier = Modifier.padding(horizontal = 18.dp, vertical = 10.dp),
-                    color = colors.onSecondary,
-                    style = MaterialTheme.typography.bodyMedium.copy(
-                        fontWeight = FontWeight.SemiBold
                     )
                 )
             }
