@@ -29,6 +29,8 @@ import com.example.clicker.ui.viewmodel.AppViewModelProvider
 fun GameDetailScreen(
     gameId: Int,
     refreshKey: Int,
+    canDelete: Boolean,
+    canEdit: Boolean,
     onEditClick: (Int) -> Unit,
     onDeleteSuccess: () -> Unit,
     modifier: Modifier = Modifier,
@@ -115,6 +117,7 @@ fun GameDetailScreen(
                 ) {
                     Button(
                         onClick = { onEditClick(game.id) },
+                        enabled = canEdit,
                         modifier = Modifier.weight(1f),
                         colors = ButtonDefaults.buttonColors(containerColor = ButtonBlue)
                     ) {
@@ -123,6 +126,7 @@ fun GameDetailScreen(
 
                     Button(
                         onClick = { viewModel.deleteGame(onDeleteSuccess) },
+                        enabled = canDelete,
                         modifier = Modifier.weight(1f),
                         colors = ButtonDefaults.buttonColors(containerColor = ButtonOrange)
                     ) {
