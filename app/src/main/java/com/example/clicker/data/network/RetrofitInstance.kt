@@ -2,6 +2,7 @@ package com.example.clicker.data.network
 
 import com.example.clicker.data.auth.AuthApiService
 import com.example.clicker.data.game.GamesApiService
+import com.example.clicker.data.festival.FestivalsApiService
 import kotlinx.serialization.json.Json
 import okhttp3.Interceptor
 import okhttp3.MediaType.Companion.toMediaType
@@ -57,5 +58,9 @@ object RetrofitInstance {
 
     val gamesApi: GamesApiService by lazy {
         retrofit.create(GamesApiService::class.java)
+    }
+
+    val festivalsApi: FestivalsApiService by lazy {
+        retrofit.create(FestivalsApiService::class.java)
     }
 }

@@ -1,5 +1,6 @@
 package com.example.clicker.ui.navigation
 
+import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -35,6 +36,7 @@ import com.example.clicker.ui.screens.games.GamesScreen
 import com.example.clicker.ui.screens.login.LoginScreen
 import com.example.clicker.ui.screens.login.LoginViewModel
 import com.example.clicker.ui.screens.register.RegisterScreen
+import com.example.clicker.ui.screens.festival.FestivalScreen
 import com.example.clicker.ui.theme.PrimaryYellow
 import com.example.clicker.ui.viewmodel.AppViewModelProvider
 
@@ -46,6 +48,7 @@ fun ClickerNavHost(
     val backStack = remember { mutableStateListOf<Any>(AppRoutes.LOGIN) }
 
     var gamesRefreshKey by remember { mutableIntStateOf(0) }
+    var festivalsRefreshKey by remember { mutableIntStateOf(0) }
     var detailRefreshKey by remember { mutableIntStateOf(0) }
 
     LaunchedEffect(Unit) {
@@ -173,7 +176,13 @@ fun ClickerNavHost(
 
                     Destination.FESTIVALS -> NavEntry(key) {
                         Box(modifier = Modifier.padding(innerPadding)) {
-                            Text("Festival")
+                            FestivalScreen(
+                                refreshKey = festivalsRefreshKey,
+                                onFestivalClick = { festivalId ->
+                                    // Navigate to festival details if needed, for now just log or stay here
+                                    Log.d("NAV", "Click on festival $festivalId")
+                                }
+                            )
                         }
                     }
 
