@@ -43,6 +43,7 @@ android {
 dependencies {
     implementation("androidx.datastore:datastore-preferences:1.0.0")
     implementation(libs.androidx.room.runtime)
+    implementation("androidx.compose.runtime:runtime:1.10.5")
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.room.ktx)
     implementation("com.squareup.okhttp3:okhttp-urlconnection:4.12.0")
@@ -71,4 +72,6 @@ dependencies {
     implementation(libs.retrofit2.converter.kotlinx.serialization)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
+    implementation("io.coil-kt.coil3:coil-compose:3.4.0")
+    implementation("io.coil-kt.coil3:coil-network-okhttp:3.4.0")
 }
