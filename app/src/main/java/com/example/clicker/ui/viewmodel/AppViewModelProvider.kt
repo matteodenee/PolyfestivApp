@@ -18,7 +18,8 @@ object AppViewModelProvider {
         initializer {
             LoginViewModel(
                 clickerApplication().container.authRepository,
-                clickerApplication().sessionPreferencesRepository
+                clickerApplication().sessionPreferencesRepository,
+                clickerApplication().applicationContext // applicationContext vit aussi longtemps que l'application
             )
         }
         initializer {
@@ -34,19 +35,22 @@ object AppViewModelProvider {
 
         initializer {
             GameDetailViewModel(
-                clickerApplication().container.gamesRepository
+                clickerApplication().container.gamesRepository,
+                clickerApplication().applicationContext
             )
         }
 
         initializer {
             GameEditViewModel(
-                clickerApplication().container.gamesRepository
+                clickerApplication().container.gamesRepository,
+                clickerApplication().applicationContext
             )
         }
 
         initializer {
             GameCreateViewModel(
-                clickerApplication().container.gamesRepository
+                clickerApplication().container.gamesRepository,
+                clickerApplication().applicationContext
             )
         }
     }
