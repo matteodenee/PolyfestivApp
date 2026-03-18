@@ -2,6 +2,7 @@ package com.example.clicker.ui.screens.exposants
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -37,11 +38,12 @@ import com.example.clicker.data.model.Exposant
 import com.example.clicker.ui.theme.AccentBlue
 import com.example.clicker.ui.theme.BackgroundCream
 import com.example.clicker.ui.theme.BorderLilac
+import com.example.clicker.ui.viewmodel.AppViewModelProvider
 
 @Composable
 fun ExposantsScreen(
     modifier: Modifier = Modifier,
-    exposantViewModel: ExposantViewModel = viewModel(),
+    exposantViewModel: ExposantViewModel = viewModel(factory = AppViewModelProvider.Factory),
     onAddClick: () -> Unit,
     onDetailsClick: (Int) -> Unit
 ) {
@@ -49,7 +51,7 @@ fun ExposantsScreen(
 
     when {
         uiState.isLoading -> {
-            androidx.compose.foundation.layout.Box(
+            Box(
                 modifier = modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
@@ -58,7 +60,7 @@ fun ExposantsScreen(
         }
 
         uiState.errorMessage != null -> {
-            androidx.compose.foundation.layout.Box(
+            Box(
                 modifier = modifier
                     .fillMaxSize()
                     .padding(16.dp),

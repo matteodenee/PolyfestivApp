@@ -1,7 +1,12 @@
 package com.example.clicker.data.repository
 
 import com.example.clicker.data.model.Exposant
+import com.example.clicker.data.remote.api.ExposantApiService
+import com.example.clicker.data.remote.dto.ActorRequest
+import com.example.clicker.data.remote.dto.ActorDto
 import kotlinx.coroutines.delay
+import retrofit2.HttpException
+import retrofit2.Response
 
 interface ExposantRepository {
     suspend fun getExposants(): List<Exposant>
@@ -72,6 +77,81 @@ class FakeExposantRepository : ExposantRepository {
     }
 }
 
+class RemoteExposantRepository(
+    private val apiService: ExposantApiService
+) : ExposantRepository {
+
+    override suspend fun getExposants(): List<Exposant> {
+        return apiService.getExposants()
+            .map { it.toExposant() }
+            .sortedBy { it.name }
+    }
+
+    override suspend fun getExposantById(id: Int): Exposant? {
+        return try {
+            apiService.getExposantById(id).toExposant()
+        } catch (_: HttpException) {
+            null
+        }
+    }
+
+    override suspend fun addExposant(exposant: Exposant): Exposant {
+        return apiService.addExposant(
+            exposant.toActorRequest()
+        ).toExposant()
+    }
+
+    override suspend fun updateExposant(exposant: Exposant): Exposant? {
+        return try {
+            apiService.updateExposant(
+                id = exposant.id,
+                body = exposant.toActorRequest()
+            ).toExposant()
+        } catch (_: HttpException) {
+            null
+        }
+    }
+
+    override suspend fun deleteExposant(id: Int): Boolean {
+        val response = apiService.deleteExposant(id)
+        return response.isSuccessful
+    }
+}
+
 object ExposantRepositoryProvider {
-    val repository: ExposantRepository by lazy { FakeExposantRepository() }
+    val repository: ExposantRepository by lazy {
+        RemoteExposantRepository(ExposantApiService.create())
+        // Pour repasser en local si besoin :
+        // FakeExposantRepository()
+    }
+}
+
+/* ----------------------------- */
+/* MAPPERS / DTO HELPERS        */
+/* ----------------------------- */
+
+fun ActorDto.toExposant(): Exposant {
+    return Exposant(
+        id = id,
+        name = name,
+        actorType = type,
+        email = email,
+        phone = phone,
+        description = description,
+        reservantType = null,
+        billingAddress = null
+    )
+}
+
+fun Exposant.toActorRequest(): ActorRequest {
+    return ActorRequest(
+        id = if (id == 0) null else id,
+        name = name,
+        type = actorType,
+        email = email,
+        phone = phone,
+        description = description,
+        reservantType = reservantType,
+        billingAddress = billingAddress
+    )
 }

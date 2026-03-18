@@ -5,7 +5,6 @@ import androidx.lifecycle.viewModelScope
 import com.example.clicker.data.model.Exposant
 import com.example.clicker.data.model.ExposantFormData
 import com.example.clicker.data.repository.ExposantRepository
-import com.example.clicker.data.repository.ExposantRepositoryProvider
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -13,7 +12,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class ExposantViewModel(
-    private val repository: ExposantRepository = ExposantRepositoryProvider.repository
+    private val repository: ExposantRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ExposantUiState())
@@ -37,7 +36,8 @@ class ExposantViewModel(
                 _uiState.update { current ->
                     current.copy(
                         isLoading = false,
-                        exposants = exposants
+                        exposants = exposants,
+                        errorMessage = null
                     )
                 }
             } catch (e: Exception) {
@@ -59,55 +59,115 @@ class ExposantViewModel(
 
     fun saveNewExposant(formData: ExposantFormData) {
         viewModelScope.launch {
-            val role = formData.role.trim().uppercase().ifBlank { "PUBLISHER" }
+            try {
+                val role = formData.role.trim().uppercase().ifBlank { "PUBLISHER" }
 
-            val newExposant = Exposant(
-                id = 0,
-                name = formData.name.trim(),
-                actorType = listOf(role),
-                phone = formData.phone.trim().ifBlank { null },
-                email = formData.email.trim().ifBlank { null },
-                description = formData.description.trim().ifBlank { null }
-            )
+                val newExposant = Exposant(
+                    id = 0,
+                    name = formData.name.trim(),
+                    actorType = listOf(role),
+                    phone = formData.phone.trim().ifBlank { null },
+                    email = formData.email.trim().ifBlank { null },
+                    description = formData.description.trim().ifBlank { null },
+                    reservantType = null,
+                    billingAddress = null
+                )
 
-            repository.addExposant(newExposant)
-            refreshExposants()
+                repository.addExposant(newExposant)
+                refreshExposants()
+            } catch (e: Exception) {
+                _uiState.update { current ->
+                    current.copy(
+                        isLoading = false,
+                        errorMessage = e.message ?: "Erreur lors de l'ajout de l'exposant"
+                    )
+                }
+            }
         }
     }
 
     fun updateExposant(exposantId: Int, formData: ExposantFormData) {
         viewModelScope.launch {
-            val currentExposant = repository.getExposantById(exposantId) ?: return@launch
-            val role = formData.role.trim().uppercase().ifBlank { "PUBLISHER" }
+            try {
+                val currentExposant = repository.getExposantById(exposantId)
 
-            val updatedExposant = currentExposant.copy(
-                name = formData.name.trim(),
-                actorType = listOf(role),
-                phone = formData.phone.trim().ifBlank { null },
-                email = formData.email.trim().ifBlank { null },
-                description = formData.description.trim().ifBlank { null }
-            )
+                if (currentExposant == null) {
+                    _uiState.update { current ->
+                        current.copy(
+                            isLoading = false,
+                            errorMessage = "Exposant introuvable"
+                        )
+                    }
+                    return@launch
+                }
 
-            repository.updateExposant(updatedExposant)
-            refreshExposants()
+                val role = formData.role.trim().uppercase().ifBlank { "PUBLISHER" }
+
+                val updatedExposant = currentExposant.copy(
+                    name = formData.name.trim(),
+                    actorType = listOf(role),
+                    phone = formData.phone.trim().ifBlank { null },
+                    email = formData.email.trim().ifBlank { null },
+                    description = formData.description.trim().ifBlank { null }
+                )
+
+                repository.updateExposant(updatedExposant)
+                refreshExposants()
+            } catch (e: Exception) {
+                _uiState.update { current ->
+                    current.copy(
+                        isLoading = false,
+                        errorMessage = e.message ?: "Erreur lors de la modification de l'exposant"
+                    )
+                }
+            }
         }
     }
 
     fun deleteExposantById(exposantId: Int) {
         viewModelScope.launch {
-            repository.deleteExposant(exposantId)
-            refreshExposants()
+            try {
+                val deleted = repository.deleteExposant(exposantId)
+
+                if (!deleted) {
+                    _uiState.update { current ->
+                        current.copy(
+                            isLoading = false,
+                            errorMessage = "Suppression impossible"
+                        )
+                    }
+                    return@launch
+                }
+
+                refreshExposants()
+            } catch (e: Exception) {
+                _uiState.update { current ->
+                    current.copy(
+                        isLoading = false,
+                        errorMessage = e.message ?: "Erreur lors de la suppression de l'exposant"
+                    )
+                }
+            }
         }
     }
 
     private suspend fun refreshExposants() {
-        val exposants = repository.getExposants()
-        _uiState.update { current ->
-            current.copy(
-                isLoading = false,
-                exposants = exposants,
-                errorMessage = null
-            )
+        try {
+            val exposants = repository.getExposants()
+            _uiState.update { current ->
+                current.copy(
+                    isLoading = false,
+                    exposants = exposants,
+                    errorMessage = null
+                )
+            }
+        } catch (e: Exception) {
+            _uiState.update { current ->
+                current.copy(
+                    isLoading = false,
+                    errorMessage = e.message ?: "Erreur lors de l'actualisation des exposants"
+                )
+            }
         }
     }
 }
