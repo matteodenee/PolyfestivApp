@@ -26,7 +26,7 @@ class ClickerApplication : Application(), SingletonImageLoader.Factory {
 
     override fun onCreate() {
         super.onCreate()
-        container = AppDataContainer()
+        container = AppDataContainer(applicationContext)
         sessionPreferencesRepository = SessionPreferencesRepository(dataStore)
     }
 
