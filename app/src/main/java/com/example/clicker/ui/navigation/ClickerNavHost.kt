@@ -7,6 +7,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -18,15 +19,30 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.ui.NavDisplay
+import com.example.clicker.ui.screens.exposants.DetailsExposantScreen
+import com.example.clicker.ui.screens.exposants.ExposantFormMode
+import com.example.clicker.ui.screens.exposants.ExposantFormScreen
+import com.example.clicker.ui.screens.exposants.ExposantViewModel
+import com.example.clicker.ui.screens.exposants.ExposantsScreen
 import com.example.clicker.ui.screens.login.LoginScreen
 import com.example.clicker.ui.screens.register.RegisterScreen
 import com.example.clicker.ui.theme.PrimaryYellow
-import com.example.clicker.ui.screens.exposants.ExposantsScreen
+import com.example.clicker.ui.viewmodel.AppViewModelProvider
+
+sealed interface ExposantNavKey {
+    data object Form : ExposantNavKey
+    data class Details(val id: Int) : ExposantNavKey
+    data class Edit(val id: Int) : ExposantNavKey
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -34,6 +50,11 @@ fun ClickerNavHost() {
     val backStack = remember { mutableStateListOf<Any>(AppRoutes.LOGIN) }
     val currentDestination = backStack.lastOrNull()
     val showBars = currentDestination is Destination
+
+    val exposantViewModel: ExposantViewModel = viewModel(
+        factory = AppViewModelProvider.Factory
+    )
+    val exposantUiState by exposantViewModel.uiState.collectAsState()
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -159,8 +180,114 @@ fun ClickerNavHost() {
 
                     Destination.EXPOSANTS -> NavEntry(key) {
                         ExposantsScreen(
+                            modifier = Modifier.padding(innerPadding),
+                            exposantViewModel = exposantViewModel,
+                            onAddClick = {
+                                backStack.add(ExposantNavKey.Form)
+                            },
+                            onDetailsClick = { exposantId ->
+                                backStack.add(ExposantNavKey.Details(exposantId))
+                            }
+                        )
+                    }
+
+                    ExposantNavKey.Form -> NavEntry(key) {
+                        ExposantFormScreen(
+                            mode = ExposantFormMode.CREATE,
+                            exposant = null,
+                            onBackClick = {
+                                backStack.removeLastOrNull()
+                            },
+                            onSaveClick = { formData ->
+                                exposantViewModel.saveNewExposant(formData)
+                                backStack.removeLastOrNull()
+                            },
                             modifier = Modifier.padding(innerPadding)
                         )
+                    }
+
+                    is ExposantNavKey.Details -> NavEntry(key) {
+                        val exposant = exposantUiState.findExposantById(key.id)
+
+                        Box(modifier = Modifier.padding(innerPadding)) {
+                            when {
+                                exposantUiState.isLoading -> {
+                                    Box(
+                                        modifier = Modifier.fillMaxSize(),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        CircularProgressIndicator()
+                                    }
+                                }
+
+                                exposant == null -> {
+                                    Box(
+                                        modifier = Modifier.fillMaxSize(),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text("Exposant introuvable")
+                                    }
+                                }
+
+                                else -> {
+                                    DetailsExposantScreen(
+                                        exposant = exposant,
+                                        onBackClick = {
+                                            backStack.removeLastOrNull()
+                                        },
+                                        onEditClick = {
+                                            backStack.add(ExposantNavKey.Edit(key.id))
+                                        },
+                                        onDeleteClick = {
+                                            exposantViewModel.deleteExposantById(key.id)
+                                            backStack.removeLastOrNull()
+                                        },
+                                        modifier = Modifier.fillMaxSize()
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    is ExposantNavKey.Edit -> NavEntry(key) {
+                        val exposant = exposantUiState.findExposantById(key.id)
+
+                        Box(modifier = Modifier.padding(innerPadding)) {
+                            when {
+                                exposantUiState.isLoading -> {
+                                    Box(
+                                        modifier = Modifier.fillMaxSize(),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        CircularProgressIndicator()
+                                    }
+                                }
+
+                                exposant == null -> {
+                                    Box(
+                                        modifier = Modifier.fillMaxSize(),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text("Exposant introuvable")
+                                    }
+                                }
+
+                                else -> {
+                                    ExposantFormScreen(
+                                        mode = ExposantFormMode.EDIT,
+                                        exposant = exposant,
+                                        onBackClick = {
+                                            backStack.removeLastOrNull()
+                                        },
+                                        onSaveClick = { formData ->
+                                            exposantViewModel.updateExposant(key.id, formData)
+                                            backStack.removeLastOrNull()
+                                        },
+                                        modifier = Modifier.padding(innerPadding)
+                                    )
+                                }
+                            }
+                        }
                     }
 
                     else -> NavEntry(key) {
