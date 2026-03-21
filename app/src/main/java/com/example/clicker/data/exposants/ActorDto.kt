@@ -1,6 +1,5 @@
-package com.example.clicker.data.remote.dto
+package com.example.clicker.data.exposants
 
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable

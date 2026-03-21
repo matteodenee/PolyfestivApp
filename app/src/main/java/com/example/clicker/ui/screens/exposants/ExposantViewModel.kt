@@ -2,9 +2,9 @@ package com.example.clicker.ui.screens.exposants
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.clicker.data.model.Exposant
-import com.example.clicker.data.model.ExposantFormData
-import com.example.clicker.data.repository.ExposantRepository
+import com.example.clicker.data.exposants.Exposant
+import com.example.clicker.data.exposants.ExposantFormData
+import com.example.clicker.data.exposants.ExposantRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

@@ -1,4 +1,4 @@
-package com.example.clicker.data.model
+package com.example.clicker.data.exposants
 
 data class Exposant(
     val id: Int,
@@ -17,6 +17,14 @@ data class ExposantFormData(
     val phone: String = "",
     val email: String = "",
     val description: String = "",
+)
+
+val availableActorRoles = listOf(
+    "PUBLISHER",
+    "PROVIDER",
+    "SHOP",
+    "ASSOCIATION",
+    "ANIMATION"
 )
 
 fun Exposant.toFormData(): ExposantFormData {

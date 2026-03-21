@@ -34,32 +34,27 @@ import com.example.clicker.ui.screens.exposants.ExposantFormScreen
 import com.example.clicker.ui.screens.exposants.ExposantViewModel
 import com.example.clicker.ui.screens.exposants.ExposantsScreen
 import com.example.clicker.ui.screens.login.LoginScreen
+import com.example.clicker.ui.screens.login.LoginViewModel
 import com.example.clicker.ui.screens.register.RegisterScreen
 import com.example.clicker.ui.theme.PrimaryYellow
 import com.example.clicker.ui.viewmodel.AppViewModelProvider
 
-sealed interface ExposantNavKey {
-    data object Form : ExposantNavKey
-    data class Details(val id: Int) : ExposantNavKey
-    data class Edit(val id: Int) : ExposantNavKey
-}
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ClickerNavHost() {
+fun ClickerNavHost(
+    loginViewModel: LoginViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    exposantViewModel: ExposantViewModel = viewModel(factory = AppViewModelProvider.Factory)
+) {
     val backStack = remember { mutableStateListOf<Any>(AppRoutes.LOGIN) }
-    val currentDestination = backStack.lastOrNull()
-    val showBars = currentDestination is Destination
-
-    val exposantViewModel: ExposantViewModel = viewModel(
-        factory = AppViewModelProvider.Factory
-    )
     val exposantUiState by exposantViewModel.uiState.collectAsState()
+
+    val currentDestination = backStack.lastOrNull()
+    val shouldDisplayBars = currentDestination !in listOf(AppRoutes.LOGIN, AppRoutes.REGISTER)
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         topBar = {
-            if (showBars) {
+            if (shouldDisplayBars) {
                 CenterAlignedTopAppBar(
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = MaterialTheme.colorScheme.primary,
@@ -72,6 +67,9 @@ fun ClickerNavHost() {
                                 Destination.FESTIVALS -> "Festivals"
                                 Destination.JEUX -> "Jeux"
                                 Destination.EXPOSANTS -> "Exposants"
+                                AppRoutes.ExposantCreateRoute -> "Ajout"
+                                is AppRoutes.ExposantDetailRoute -> "Détail"
+                                is AppRoutes.ExposantEditRoute -> "Modification"
                                 else -> "Clicker"
                             }
                         )
@@ -94,7 +92,7 @@ fun ClickerNavHost() {
             }
         },
         bottomBar = {
-            if (showBars) {
+            if (shouldDisplayBars) {
                 BottomAppBar(
                     containerColor = MaterialTheme.colorScheme.primary
                 ) {
@@ -103,9 +101,9 @@ fun ClickerNavHost() {
                     ) {
                         Destination.entries.forEach { destination ->
                             NavigationBarItem(
-                                selected = currentDestination == destination,
+                                selected = isDestinationSelected(currentDestination, destination),
                                 onClick = {
-                                    if (currentDestination != destination) {
+                                    if (!isDestinationSelected(currentDestination, destination)) {
                                         backStack.add(destination)
                                     }
                                 },
@@ -179,35 +177,33 @@ fun ClickerNavHost() {
                     }
 
                     Destination.EXPOSANTS -> NavEntry(key) {
-                        ExposantsScreen(
-                            modifier = Modifier.padding(innerPadding),
-                            exposantViewModel = exposantViewModel,
-                            onAddClick = {
-                                backStack.add(ExposantNavKey.Form)
-                            },
-                            onDetailsClick = { exposantId ->
-                                backStack.add(ExposantNavKey.Details(exposantId))
-                            }
-                        )
+                        Box(modifier = Modifier.padding(innerPadding)) {
+                            ExposantsScreen(
+                                exposantViewModel = exposantViewModel,
+                                onAddClick = { backStack.add(AppRoutes.ExposantCreateRoute) },
+                                onDetailsClick = { exposantId ->
+                                    backStack.add(AppRoutes.ExposantDetailRoute(exposantId))
+                                }
+                            )
+                        }
                     }
 
-                    ExposantNavKey.Form -> NavEntry(key) {
-                        ExposantFormScreen(
-                            mode = ExposantFormMode.CREATE,
-                            exposant = null,
-                            onBackClick = {
-                                backStack.removeLastOrNull()
-                            },
-                            onSaveClick = { formData ->
-                                exposantViewModel.saveNewExposant(formData)
-                                backStack.removeLastOrNull()
-                            },
-                            modifier = Modifier.padding(innerPadding)
-                        )
+                    AppRoutes.ExposantCreateRoute -> NavEntry(key) {
+                        Box(modifier = Modifier.padding(innerPadding)) {
+                            ExposantFormScreen(
+                                mode = ExposantFormMode.CREATE,
+                                exposant = null,
+                                onBackClick = { backStack.removeLastOrNull() },
+                                onSaveClick = { formData ->
+                                    exposantViewModel.saveNewExposant(formData)
+                                    backStack.removeLastOrNull()
+                                }
+                            )
+                        }
                     }
 
-                    is ExposantNavKey.Details -> NavEntry(key) {
-                        val exposant = exposantUiState.findExposantById(key.id)
+                    is AppRoutes.ExposantDetailRoute -> NavEntry(key) {
+                        val exposant = exposantUiState.findExposantById(key.exposantId)
 
                         Box(modifier = Modifier.padding(innerPadding)) {
                             when {
@@ -236,10 +232,10 @@ fun ClickerNavHost() {
                                             backStack.removeLastOrNull()
                                         },
                                         onEditClick = {
-                                            backStack.add(ExposantNavKey.Edit(key.id))
+                                            backStack.add(AppRoutes.ExposantEditRoute(key.exposantId))
                                         },
                                         onDeleteClick = {
-                                            exposantViewModel.deleteExposantById(key.id)
+                                            exposantViewModel.deleteExposantById(key.exposantId)
                                             backStack.removeLastOrNull()
                                         },
                                         modifier = Modifier.fillMaxSize()
@@ -249,8 +245,8 @@ fun ClickerNavHost() {
                         }
                     }
 
-                    is ExposantNavKey.Edit -> NavEntry(key) {
-                        val exposant = exposantUiState.findExposantById(key.id)
+                    is AppRoutes.ExposantEditRoute -> NavEntry(key) {
+                        val exposant = exposantUiState.findExposantById(key.exposantId)
 
                         Box(modifier = Modifier.padding(innerPadding)) {
                             when {
@@ -280,10 +276,9 @@ fun ClickerNavHost() {
                                             backStack.removeLastOrNull()
                                         },
                                         onSaveClick = { formData ->
-                                            exposantViewModel.updateExposant(key.id, formData)
+                                            exposantViewModel.updateExposant(key.exposantId, formData)
                                             backStack.removeLastOrNull()
-                                        },
-                                        modifier = Modifier.padding(innerPadding)
+                                        }
                                     )
                                 }
                             }
@@ -298,5 +293,18 @@ fun ClickerNavHost() {
                 }
             }
         )
+    }
+}
+
+private fun isDestinationSelected(currentDestination: Any?, destination: Destination): Boolean {
+    return when (destination) {
+        Destination.JEUX -> currentDestination == Destination.JEUX
+
+        Destination.EXPOSANTS -> currentDestination == Destination.EXPOSANTS ||
+                currentDestination == AppRoutes.ExposantCreateRoute ||
+                currentDestination is AppRoutes.ExposantDetailRoute ||
+                currentDestination is AppRoutes.ExposantEditRoute
+
+        else -> currentDestination == destination
     }
 }

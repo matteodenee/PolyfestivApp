@@ -1,15 +1,13 @@
 package com.example.clicker.data.network
 
 import com.example.clicker.data.auth.AuthApiService
-import com.example.clicker.data.remote.api.ExposantApiService
+import com.example.clicker.data.exposants.ExposantApiService
 import kotlinx.serialization.json.Json
-import okhttp3.JavaNetCookieJar
+import okhttp3.Interceptor
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
-import java.net.CookieManager
-import java.net.CookiePolicy
 
 object RetrofitInstance {
 
@@ -19,12 +17,7 @@ object RetrofitInstance {
         ignoreUnknownKeys = true
     }
 
-    private val cookieManager = CookieManager().apply {
-        setCookiePolicy(CookiePolicy.ACCEPT_ALL)
-    }
-
     private val okHttpClient = OkHttpClient.Builder()
-        .cookieJar(JavaNetCookieJar(cookieManager))
         .build()
 
     private val retrofit: Retrofit by lazy {

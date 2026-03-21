@@ -1,6 +1,6 @@
 package com.example.clicker.ui.screens.exposants
 
-import com.example.clicker.data.model.Exposant
+import com.example.clicker.data.exposants.Exposant
 
 data class ExposantUiState(
     val isLoading: Boolean = true,
