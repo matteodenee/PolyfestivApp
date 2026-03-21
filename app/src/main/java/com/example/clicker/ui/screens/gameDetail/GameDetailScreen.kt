@@ -24,6 +24,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.clicker.ui.theme.ButtonBlue
 import com.example.clicker.ui.theme.ButtonOrange
 import com.example.clicker.ui.viewmodel.AppViewModelProvider
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.draw.clip
+import coil3.compose.AsyncImage
 
 @Composable
 fun GameDetailScreen(
@@ -77,6 +81,20 @@ fun GameDetailScreen(
                     .verticalScroll(rememberScrollState())
                     .padding(16.dp)
             ) {
+                if (game.imageUrl.isNotBlank()) {
+                    AsyncImage(
+                        model = game.imageUrl,
+                        contentDescription = game.name,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(200.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
+
                 Text(
                     text = game.name,
                     style = MaterialTheme.typography.headlineMedium
