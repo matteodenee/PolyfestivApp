@@ -21,6 +21,7 @@ class SessionPreferencesRepository(
         val ACCESS_COOKIE = stringPreferencesKey("access_cookie")
         val REFRESH_COOKIE = stringPreferencesKey("refresh_cookie")
         val IS_LOGGED_IN = booleanPreferencesKey("is_logged_in")
+        val USER_ROLE = stringPreferencesKey("user_role")
     }
 
     val accessCookie: Flow<String?> = dataStore.data
@@ -62,10 +63,11 @@ class SessionPreferencesRepository(
             preferences[IS_LOGGED_IN] ?: false
         }
 
-    suspend fun saveSession(accessCookie: String, refreshCookie: String) {
+    suspend fun saveSession(accessCookie: String, refreshCookie: String, userRole: String) {
         dataStore.edit { preferences ->
             preferences[ACCESS_COOKIE] = accessCookie
             preferences[REFRESH_COOKIE] = refreshCookie
+            preferences[USER_ROLE] = userRole
             preferences[IS_LOGGED_IN] = true
         }
     }
@@ -80,7 +82,21 @@ class SessionPreferencesRepository(
         dataStore.edit { preferences ->
             preferences.remove(ACCESS_COOKIE)
             preferences.remove(REFRESH_COOKIE)
+            preferences.remove(USER_ROLE)
             preferences[IS_LOGGED_IN] = false
         }
     }
+
+    val userRole: Flow<String?> = dataStore.data
+        .catch { exception ->
+            if (exception is IOException) {
+                Log.e(TAG, "Erreur lecture rôle utilisateur", exception)
+                emit(emptyPreferences())
+            } else {
+                throw exception
+            }
+        }
+        .map { preferences ->
+            preferences[USER_ROLE]
+        }
 }
