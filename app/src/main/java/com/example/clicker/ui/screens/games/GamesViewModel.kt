@@ -25,11 +25,24 @@ class GamesViewModel(
             internalState.value = GamesUiState.Loading
             try {
                 val games = gamesRepository.getGames()
-                Log.d(TAG, "Jeux chargés : ${games.size}")
+                Log.d(TAG, "Jeux chargés depuis le back : ${games.size}")
                 internalState.value = GamesUiState.Success(games)
-            } catch (e: Exception) {
-                Log.e(TAG, "Erreur chargement jeux", e)
-                internalState.value = GamesUiState.Error("Impossible de charger les jeux")
+            } catch (e: Exception) { // si le réseau échoue, on passe au local
+                Log.e(TAG, "Erreur chargement back, tentative Room", e)
+                try {
+                    val localGames = gamesRepository.getLocalGames()
+                    if (localGames.isNotEmpty()) {
+                        Log.d(TAG, "Jeux chargés depuis Room : ${localGames.size}")
+                        internalState.value = GamesUiState.Success(localGames)
+                    } else {
+                        internalState.value = GamesUiState.Error(
+                            "Impossible de charger les jeux et aucune donnée locale n'est disponible"
+                        )
+                    }
+                } catch (localException: Exception) {
+                    Log.e(TAG, "Erreur chargement Room", localException)
+                    internalState.value = GamesUiState.Error("Impossible de charger les jeux")
+                }
             }
         }
     }

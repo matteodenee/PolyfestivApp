@@ -25,6 +25,7 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.ui.NavDisplay
@@ -36,6 +37,7 @@ import com.example.clicker.ui.screens.login.LoginScreen
 import com.example.clicker.ui.screens.login.LoginViewModel
 import com.example.clicker.ui.screens.register.RegisterScreen
 import com.example.clicker.ui.theme.PrimaryYellow
+import com.example.clicker.ui.utils.network.NetworkUtils
 import com.example.clicker.ui.viewmodel.AppViewModelProvider
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -47,6 +49,7 @@ fun ClickerNavHost(
 
     var gamesRefreshKey by remember { mutableIntStateOf(0) }
     var detailRefreshKey by remember { mutableIntStateOf(0) }
+    val context = LocalContext.current
 
     LaunchedEffect(Unit) {
         loginViewModel.restoreSessionIfNeeded {
@@ -178,14 +181,19 @@ fun ClickerNavHost(
                     }
 
                     Destination.JEUX -> NavEntry(key) {
+                        val isOnline = NetworkUtils.isInternetAvailable(context)
+
                         Box(modifier = Modifier.padding(innerPadding)) {
                             GamesScreen(
                                 refreshKey = gamesRefreshKey,
+                                canAdd = isOnline,
                                 onGameClick = { gameId ->
                                     backStack.add(AppRoutes.GameDetailRoute(gameId))
                                 },
                                 onAddClick = {
-                                    backStack.add(AppRoutes.GameCreateRoute)
+                                    if (NetworkUtils.isInternetAvailable(context)) {
+                                        backStack.add(AppRoutes.GameCreateRoute)
+                                    }
                                 }
                             )
                         }
@@ -198,21 +206,37 @@ fun ClickerNavHost(
                     }
 
                     AppRoutes.GameCreateRoute -> NavEntry(key) {
-                        Box(modifier = Modifier.padding(innerPadding)) {
-                            GameCreateScreen(
-                                onCreateSuccess = {
-                                    gamesRefreshKey++
-                                    backStack.removeLastOrNull()
-                                }
-                            )
+                        val isOnline = NetworkUtils.isInternetAvailable(context)
+
+                        if (!isOnline) {
+                            LaunchedEffect(Unit) {
+                                backStack.removeLastOrNull()
+                            }
+
+                            Box(modifier = Modifier.padding(innerPadding)) {
+                                Text("Connexion internet requise")
+                            }
+                        } else {
+                            Box(modifier = Modifier.padding(innerPadding)) {
+                                GameCreateScreen(
+                                    onCreateSuccess = {
+                                        gamesRefreshKey++
+                                        backStack.removeLastOrNull()
+                                    }
+                                )
+                            }
                         }
                     }
 
                     is AppRoutes.GameDetailRoute -> NavEntry(key) {
+                        val isOnline = NetworkUtils.isInternetAvailable(context)
+
                         Box(modifier = Modifier.padding(innerPadding)) {
                             GameDetailScreen(
                                 gameId = key.gameId,
                                 refreshKey = detailRefreshKey,
+                                canDelete = isOnline,
+                                canEdit = isOnline,
                                 onEditClick = { gameId ->
                                     backStack.add(AppRoutes.GameEditRoute(gameId))
                                 },
@@ -225,15 +249,27 @@ fun ClickerNavHost(
                     }
 
                     is AppRoutes.GameEditRoute -> NavEntry(key) {
-                        Box(modifier = Modifier.padding(innerPadding)) {
-                            GameEditScreen(
-                                gameId = key.gameId,
-                                onEditSuccess = {
-                                    gamesRefreshKey++
-                                    detailRefreshKey++
-                                    backStack.removeLastOrNull()
-                                }
-                            )
+                        val isOnline = NetworkUtils.isInternetAvailable(context)
+
+                        if (!isOnline) {
+                            LaunchedEffect(Unit) {
+                                backStack.removeLastOrNull()
+                            }
+
+                            Box(modifier = Modifier.padding(innerPadding)) {
+                                Text("Connexion internet requise")
+                            }
+                        } else {
+                            Box(modifier = Modifier.padding(innerPadding)) {
+                                GameEditScreen(
+                                    gameId = key.gameId,
+                                    onEditSuccess = {
+                                        gamesRefreshKey++
+                                        detailRefreshKey++
+                                        backStack.removeLastOrNull()
+                                    }
+                                )
+                            }
                         }
                     }
 
