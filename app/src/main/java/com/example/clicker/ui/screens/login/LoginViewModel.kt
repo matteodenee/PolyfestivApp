@@ -29,6 +29,14 @@ class LoginViewModel(
     private val internalState = mutableStateOf<LoginUiState>(LoginUiState.Idle)
     val state: State<LoginUiState> = internalState
 
+
+    private val currentUserRoleState = mutableStateOf<String?>(null)
+    val currentUserRole: State<String?> = currentUserRoleState
+
+    fun isAdmin(): Boolean {
+        return currentUserRoleState.value.equals("admin", ignoreCase = true)
+    }
+
     fun onLoginChange(value: String) {
         loginTextState.value = value
     }
@@ -62,7 +70,10 @@ class LoginViewModel(
                 SessionCookieHolder.accessCookie = accessCookie
                 SessionCookieHolder.refreshCookie = refreshCookie
 
-                sessionPreferencesRepository.saveSession(accessCookie, refreshCookie)
+                val userRole = result.response.user.role
+                currentUserRoleState.value = userRole
+
+                sessionPreferencesRepository.saveSession(accessCookie, refreshCookie, userRole)
 
                 Log.d(TAG, "Connexion réussie pour : ${result.response.user.login}")
                 internalState.value = LoginUiState.Success(result.response.user)
@@ -80,6 +91,7 @@ class LoginViewModel(
         viewModelScope.launch {
             val savedAccessCookie = sessionPreferencesRepository.accessCookie.first()
             val savedRefreshCookie = sessionPreferencesRepository.refreshCookie.first()
+            val savedUserRole = sessionPreferencesRepository.userRole.first()
 
             if (savedAccessCookie.isNullOrBlank() || savedRefreshCookie.isNullOrBlank()) {
                 Log.d(TAG, "Aucune session sauvegardée")
@@ -90,6 +102,7 @@ class LoginViewModel(
 
             SessionCookieHolder.accessCookie = savedAccessCookie
             SessionCookieHolder.refreshCookie = savedRefreshCookie
+            currentUserRoleState.value = savedUserRole
 
             // Si l’utilisateur a déjà une session sauvegardée et qu’il n’a pas Internet, on ne bloque pas l’accès, on le laisse entrer en offline
             if (!NetworkUtils.isInternetAvailable(context)) {
@@ -133,6 +146,7 @@ class LoginViewModel(
         viewModelScope.launch {
             SessionCookieHolder.accessCookie = null
             SessionCookieHolder.refreshCookie = null
+            currentUserRoleState.value = null
             sessionPreferencesRepository.clearSession()
             internalState.value = LoginUiState.Idle
             onLoggedOut()
