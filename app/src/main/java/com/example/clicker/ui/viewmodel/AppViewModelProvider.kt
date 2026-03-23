@@ -12,6 +12,7 @@ import com.example.clicker.ui.screens.gameEdit.GameEditViewModel
 import com.example.clicker.ui.screens.games.GamesViewModel
 import com.example.clicker.ui.screens.login.LoginViewModel
 import com.example.clicker.ui.screens.register.RegisterViewModel
+import com.example.clicker.ui.screens.admin.AdminViewModel
 
 object AppViewModelProvider {
     val Factory = viewModelFactory {
@@ -51,6 +52,12 @@ object AppViewModelProvider {
             GameCreateViewModel(
                 clickerApplication().container.gamesRepository,
                 clickerApplication().applicationContext
+            )
+        }
+
+        initializer {
+            AdminViewModel(
+                clickerApplication().container.adminRepository
             )
         }
     }
