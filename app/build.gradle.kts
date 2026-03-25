@@ -41,6 +41,8 @@ android {
 }
 
 dependencies {
+    implementation("androidx.datastore:datastore-preferences:1.0.0")
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -70,6 +72,9 @@ dependencies {
     ksp(libs.androidx.room.compiler)
 
     implementation("com.squareup.okhttp3:okhttp-urlconnection:4.12.0")
+
+    implementation("io.coil-kt.coil3:coil-compose:3.4.0")
+    implementation("io.coil-kt.coil3:coil-network-okhttp:3.4.0")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

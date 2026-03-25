@@ -6,21 +6,53 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.clicker.ClickerApplication
 import com.example.clicker.ui.screens.exposants.ExposantViewModel
+import com.example.clicker.ui.screens.gameCreate.GameCreateViewModel
+import com.example.clicker.ui.screens.gameDetail.GameDetailViewModel
+import com.example.clicker.ui.screens.gameEdit.GameEditViewModel
+import com.example.clicker.ui.screens.games.GamesViewModel
 import com.example.clicker.ui.screens.login.LoginViewModel
 import com.example.clicker.ui.screens.register.RegisterViewModel
 
 object AppViewModelProvider {
     val Factory = viewModelFactory {
-
         initializer {
             LoginViewModel(
-                clickerApplication().container.authRepository
+                clickerApplication().container.authRepository,
+                clickerApplication().sessionPreferencesRepository,
+                clickerApplication().applicationContext
             )
         }
 
         initializer {
             RegisterViewModel(
                 clickerApplication().container.authRepository
+            )
+        }
+
+        initializer {
+            GamesViewModel(
+                clickerApplication().container.gamesRepository
+            )
+        }
+
+        initializer {
+            GameDetailViewModel(
+                clickerApplication().container.gamesRepository,
+                clickerApplication().applicationContext
+            )
+        }
+
+        initializer {
+            GameEditViewModel(
+                clickerApplication().container.gamesRepository,
+                clickerApplication().applicationContext
+            )
+        }
+
+        initializer {
+            GameCreateViewModel(
+                clickerApplication().container.gamesRepository,
+                clickerApplication().applicationContext
             )
         }
 

@@ -12,22 +12,7 @@ enum class Destination(
     val icon: ImageVector,
     val contentDescription: String
 ) {
-    FESTIVALS(
-        route = "festivals",
-        label = "Festivals",
-        icon = Icons.Default.Celebration,
-        contentDescription = "Festivals"
-    ),
-    JEUX(
-        route = "jeux",
-        label = "Jeux",
-        icon = Icons.Default.Casino,
-        contentDescription = "Jeux"
-    ),
-    EXPOSANTS(
-        route = "exposants",
-        label = "Exposants",
-        icon = Icons.Default.Storefront,
-        contentDescription = "Exposants"
-    )
+    FESTIVALS("festivals", "Festivals", Icons.Default.Celebration, "Festivals"),
+    JEUX("jeux", "Jeux", Icons.Default.Casino, "Jeux"),
+    EXPOSANTS("exposants", "Exposants", Icons.Default.Storefront, "Exposants")
 }

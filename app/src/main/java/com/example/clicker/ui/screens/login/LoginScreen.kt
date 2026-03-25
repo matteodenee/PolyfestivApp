@@ -54,12 +54,6 @@ fun LoginScreen(
                 CircularProgressIndicator()
             }
 
-            is LoginUiState.Success -> {
-                LaunchedEffect(Unit) {
-                    onLoginSuccess()
-                }
-            }
-
             else -> {
                 Text(
                     text = "Se connecter",
