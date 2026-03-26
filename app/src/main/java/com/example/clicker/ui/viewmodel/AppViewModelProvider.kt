@@ -60,6 +60,7 @@ object AppViewModelProvider {
         initializer {
             AdminViewModel(
                 clickerApplication().container.adminRepository
+            )
         }
         
         initializer {

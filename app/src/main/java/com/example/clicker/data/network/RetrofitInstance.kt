@@ -63,6 +63,7 @@ object RetrofitInstance {
 
     val adminApi: AdminApiService by lazy {
         retrofit.create(AdminApiService::class.java)
+    }
     val exposantApi: ExposantApiService by lazy {
         retrofit.create(ExposantApiService::class.java)
     }
