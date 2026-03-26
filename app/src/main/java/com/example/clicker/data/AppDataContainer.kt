@@ -6,6 +6,7 @@ import com.example.clicker.data.exposants.ExposantRepository
 import com.example.clicker.data.game.GamesRepository
 import com.example.clicker.data.local.game.GameDatabase
 import com.example.clicker.data.network.RetrofitInstance
+import com.example.clicker.data.admin.AdminRepository
 
 class AppDataContainer(
     private val context: Context
@@ -24,5 +25,9 @@ class AppDataContainer(
             api = RetrofitInstance.gamesApi,
             gameDao = GameDatabase.getDatabase(context).gameDao()
         )
+    }
+
+    override val adminRepository: AdminRepository by lazy {
+        AdminRepository(RetrofitInstance.adminApi)
     }
 }

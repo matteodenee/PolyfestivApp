@@ -9,6 +9,7 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
+import com.example.clicker.data.admin.AdminApiService
 
 object RetrofitInstance {
 
@@ -60,6 +61,8 @@ object RetrofitInstance {
         retrofit.create(GamesApiService::class.java)
     }
 
+    val adminApi: AdminApiService by lazy {
+        retrofit.create(AdminApiService::class.java)
     val exposantApi: ExposantApiService by lazy {
         retrofit.create(ExposantApiService::class.java)
     }

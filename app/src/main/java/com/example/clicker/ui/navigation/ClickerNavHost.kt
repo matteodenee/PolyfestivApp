@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
@@ -32,6 +33,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.ui.NavDisplay
+import com.example.clicker.ui.screens.admin.AdminScreen
 import com.example.clicker.ui.screens.exposants.DetailsExposantScreen
 import com.example.clicker.ui.screens.exposants.ExposantFormMode
 import com.example.clicker.ui.screens.exposants.ExposantFormScreen
@@ -59,6 +61,7 @@ fun ClickerNavHost(
 
     var gamesRefreshKey by remember { mutableIntStateOf(0) }
     var detailRefreshKey by remember { mutableIntStateOf(0) }
+    var adminRefreshKey by remember { mutableIntStateOf(0) }
     val context = LocalContext.current
 
     LaunchedEffect(Unit) {
@@ -70,6 +73,13 @@ fun ClickerNavHost(
 
     val currentDestination = backStack.lastOrNull()
     val shouldDisplayBars = currentDestination !in listOf(AppRoutes.LOGIN, AppRoutes.REGISTER)
+    val isAdmin = loginViewModel.isAdmin()
+
+    val bottomDestinations = if (isAdmin) {
+        Destination.entries.toList()
+    } else {
+        Destination.entries.filter { it != Destination.ADMIN }
+    }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -87,6 +97,10 @@ fun ClickerNavHost(
                                 Destination.FESTIVALS -> "Festivals"
                                 Destination.JEUX -> "Jeux"
                                 Destination.EXPOSANTS -> "Exposants"
+                                Destination.ADMIN -> "Admin"
+                                AppRoutes.GameCreateRoute -> "Ajout"
+                                is AppRoutes.GameDetailRoute -> "Détail"
+                                is AppRoutes.GameEditRoute -> "Modification"
                                 AppRoutes.GameCreateRoute,
                                 AppRoutes.ExposantCreateRoute -> "Ajout"
                                 is AppRoutes.GameDetailRoute,
@@ -110,6 +124,21 @@ fun ClickerNavHost(
                                 contentDescription = "Retour"
                             )
                         }
+                    },
+                    actions = {
+                        IconButton(
+                            onClick = {
+                                loginViewModel.logout {
+                                    backStack.clear()
+                                    backStack.add(AppRoutes.LOGIN)
+                                }
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Logout,
+                                contentDescription = "Déconnexion"
+                            )
+                        }
                     }
                 )
             }
@@ -122,7 +151,7 @@ fun ClickerNavHost(
                     NavigationBar(
                         containerColor = MaterialTheme.colorScheme.primary
                     ) {
-                        Destination.entries.forEach { destination ->
+                        bottomDestinations.forEach { destination ->
                             NavigationBarItem(
                                 selected = isDestinationSelected(currentDestination, destination),
                                 onClick = {
@@ -174,6 +203,7 @@ fun ClickerNavHost(
                         Box(modifier = Modifier.padding(innerPadding)) {
                             RegisterScreen(
                                 onRegisterSuccess = {
+                                    adminRefreshKey++
                                     if (backStack.size > 1) {
                                         backStack.removeLastOrNull()
                                     }
@@ -222,6 +252,14 @@ fun ClickerNavHost(
                                 onDetailsClick = { exposantId ->
                                     backStack.add(AppRoutes.ExposantDetailRoute(exposantId))
                                 }
+                            )
+                        }
+                    }
+
+                    Destination.ADMIN -> NavEntry(key) {
+                        Box(modifier = Modifier.padding(innerPadding)) {
+                            AdminScreen(
+                                refreshKey = adminRefreshKey
                             )
                         }
                     }
