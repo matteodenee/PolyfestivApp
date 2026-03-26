@@ -82,7 +82,6 @@ fun ClickerNavHost(
                                 is AppRoutes.GameDetailRoute -> "Détail"
                                 is AppRoutes.GameEditRoute -> "Modification"
                                 is AppRoutes.FestivalDetailRoute -> "Détail Festival"
-                                is AppRoutes.FestivalEditRoute -> "Modification Festival"
                                 else -> "Clicker"
                             }
                         )
@@ -253,8 +252,8 @@ fun ClickerNavHost(
                             FestivalDetailScreen(
                                 festivalId = key.festivalId,
                                 refreshKey = detailRefreshKey,
-                                onEditClick = { festivalId ->
-                                    backStack.add(AppRoutes.FestivalEditRoute(festivalId))
+                                onEditClick = {
+
                                 },
                                 onDeleteSuccess = {
                                     festivalsRefreshKey++
@@ -283,8 +282,7 @@ private fun isDestinationSelected(currentDestination: Any?, destination: Destina
                 currentDestination is AppRoutes.GameEditRoute
 
         Destination.FESTIVALS -> currentDestination == Destination.FESTIVALS ||
-                currentDestination is AppRoutes.FestivalDetailRoute ||
-                currentDestination is AppRoutes.FestivalEditRoute
+                currentDestination is AppRoutes.FestivalDetailRoute
 
         else -> currentDestination == destination
     }
