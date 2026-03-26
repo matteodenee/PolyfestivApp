@@ -1,39 +1,66 @@
 package com.example.clicker.data.exposants
 
+import com.example.clicker.data.local.exposant.ExposantDao
+import com.example.clicker.data.local.exposant.toEntity
+import com.example.clicker.data.local.exposant.toExposant
 import retrofit2.HttpException
 
 class ExposantRepository(
-    private val api: ExposantApiService
+    private val api: ExposantApiService,
+    private val exposantDao: ExposantDao
 ) {
 
     suspend fun getExposants(): List<Exposant> {
-        return api.getExposants()
+        val remoteExposants = api.getExposants()
+            .map { it.toExposant() }
+            .sortedBy { it.name }
+
+        exposantDao.insertAllExposants(remoteExposants.map { it.toEntity() })
+        return remoteExposants
+    }
+
+    suspend fun getLocalExposants(): List<Exposant> {
+        return exposantDao.getAllExposants()
             .map { it.toExposant() }
             .sortedBy { it.name }
     }
 
     suspend fun getExposantById(id: Int): Exposant? {
         return try {
-            api.getExposantById(id).toExposant()
+            val remoteExposant = api.getExposantById(id).toExposant()
+            exposantDao.insertExposant(remoteExposant.toEntity())
+            remoteExposant
         } catch (_: HttpException) {
             null
         }
     }
 
+    suspend fun getLocalExposantById(id: Int): Exposant? {
+        return exposantDao.getExposantById(id)?.toExposant()
+    }
+
     suspend fun addExposant(exposant: Exposant): Exposant {
-        return api.addExposant(exposant.toActorRequest()).toExposant()
+        val createdExposant = api.addExposant(exposant.toActorRequest()).toExposant()
+        exposantDao.insertExposant(createdExposant.toEntity())
+        return createdExposant
     }
 
     suspend fun updateExposant(exposant: Exposant): Exposant? {
         return try {
-            api.updateExposant(exposant.id, exposant.toActorRequest()).toExposant()
+            val updatedExposant = api.updateExposant(exposant.id, exposant.toActorRequest()).toExposant()
+            exposantDao.insertExposant(updatedExposant.toEntity())
+            updatedExposant
         } catch (_: HttpException) {
             null
         }
     }
 
     suspend fun deleteExposant(id: Int): Boolean {
-        return api.deleteExposant(id).isSuccessful
+        val response = api.deleteExposant(id)
+        if (response.isSuccessful) {
+            exposantDao.deleteExposantById(id)
+        }
+        return response.isSuccessful
     }
 }
 

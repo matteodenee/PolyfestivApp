@@ -1,6 +1,7 @@
 package com.example.clicker.ui.screens.exposants
 
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -32,27 +33,27 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.clicker.R
 import com.example.clicker.data.exposants.Exposant
+import com.example.clicker.data.exposants.typeLabel
 import com.example.clicker.ui.theme.SearchField
 import com.example.clicker.ui.viewmodel.AppViewModelProvider
-import com.example.clicker.data.exposants.typeLabel
-import androidx.compose.runtime.collectAsState
-import androidx.compose.foundation.Image
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.layout.ContentScale
-import com.example.clicker.R
 
 @Composable
 fun ExposantsScreen(
@@ -115,29 +116,10 @@ fun ExposantsScreen(
                     )
                 )
 
-                Surface(
-                    onClick = onAddClick,
-                    color = Color.Transparent
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.padding(horizontal = 4.dp, vertical = 4.dp)
-                    ) {
-                        Text(
-                            text = "Ajouter un exposant",
-                            color = colors.onBackground,
-                            style = MaterialTheme.typography.bodyLarge
-                        )
-
-                        Spacer(modifier = Modifier.width(6.dp))
-
-                        Icon(
-                            imageVector = Icons.Default.AddCircleOutline,
-                            contentDescription = "Ajouter un exposant",
-                            tint = colors.onBackground
-                        )
-                    }
-                }
+                AddExposantButton(
+                    enabled = uiState.isOnline,
+                    onClick = onAddClick
+                )
             }
 
             Spacer(modifier = Modifier.height(18.dp))
@@ -180,6 +162,42 @@ fun ExposantsScreen(
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun AddExposantButton(
+    enabled: Boolean,
+    onClick: () -> Unit
+) {
+    val colors = MaterialTheme.colorScheme
+    val contentAlpha = if (enabled) 1f else 0.45f
+
+    Surface(
+        onClick = {
+            if (enabled) onClick()
+        },
+        color = Color.Transparent,
+        modifier = Modifier.alpha(contentAlpha)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(horizontal = 4.dp, vertical = 4.dp)
+        ) {
+            Text(
+                text = "Ajouter un exposant",
+                color = colors.onBackground,
+                style = MaterialTheme.typography.bodyLarge
+            )
+
+            Spacer(modifier = Modifier.width(6.dp))
+
+            Icon(
+                imageVector = Icons.Default.AddCircleOutline,
+                contentDescription = "Ajouter un exposant",
+                tint = colors.onBackground
+            )
         }
     }
 }

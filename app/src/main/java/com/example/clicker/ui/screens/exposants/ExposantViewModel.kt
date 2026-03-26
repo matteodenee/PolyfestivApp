@@ -1,10 +1,14 @@
 package com.example.clicker.ui.screens.exposants
 
+import android.content.Context
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.clicker.TAG
 import com.example.clicker.data.exposants.Exposant
 import com.example.clicker.data.exposants.ExposantFormData
 import com.example.clicker.data.exposants.ExposantRepository
+import com.example.clicker.ui.utils.network.NetworkUtils
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -12,7 +16,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class ExposantViewModel(
-    private val repository: ExposantRepository
+    private val repository: ExposantRepository,
+    private val context: Context
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ExposantUiState())
@@ -33,6 +38,7 @@ class ExposantViewModel(
 
             try {
                 val exposants = repository.getExposants()
+                Log.d(TAG, "Exposants chargés depuis le back : ${exposants.size}")
                 _uiState.update { current ->
                     current.copy(
                         isLoading = false,
@@ -41,11 +47,35 @@ class ExposantViewModel(
                     )
                 }
             } catch (e: Exception) {
-                _uiState.update { current ->
-                    current.copy(
-                        isLoading = false,
-                        errorMessage = e.message ?: "Erreur lors du chargement des exposants"
-                    )
+                Log.e(TAG, "Erreur chargement back, tentative Room", e)
+
+                try {
+                    val localExposants = repository.getLocalExposants()
+                    if (localExposants.isNotEmpty()) {
+                        Log.d(TAG, "Exposants chargés depuis Room : ${localExposants.size}")
+                        _uiState.update { current ->
+                            current.copy(
+                                isLoading = false,
+                                exposants = localExposants,
+                                errorMessage = null
+                            )
+                        }
+                    } else {
+                        _uiState.update { current ->
+                            current.copy(
+                                isLoading = false,
+                                errorMessage = "Impossible de charger les exposants et aucune donnée locale n'est disponible"
+                            )
+                        }
+                    }
+                } catch (localException: Exception) {
+                    Log.e(TAG, "Erreur chargement Room", localException)
+                    _uiState.update { current ->
+                        current.copy(
+                            isLoading = false,
+                            errorMessage = "Impossible de charger les exposants"
+                        )
+                    }
                 }
             }
         }
@@ -58,7 +88,24 @@ class ExposantViewModel(
     }
 
     fun saveNewExposant(formData: ExposantFormData) {
+        if (!NetworkUtils.isInternetAvailable(context)) {
+            _uiState.update { current ->
+                current.copy(
+                    isLoading = false,
+                    errorMessage = "Mode hors ligne : création impossible"
+                )
+            }
+            return
+        }
+
         viewModelScope.launch {
+            _uiState.update { current ->
+                current.copy(
+                    isLoading = true,
+                    errorMessage = null
+                )
+            }
+
             try {
                 val role = formData.role.trim().uppercase().ifBlank { "PUBLISHER" }
 
@@ -74,12 +121,14 @@ class ExposantViewModel(
                 )
 
                 repository.addExposant(newExposant)
+                Log.d(TAG, "Exposant créé : ${newExposant.name}")
                 refreshExposants()
             } catch (e: Exception) {
+                Log.e(TAG, "Erreur ajout exposant", e)
                 _uiState.update { current ->
                     current.copy(
                         isLoading = false,
-                        errorMessage = e.message ?: "Erreur lors de l'ajout de l'exposant"
+                        errorMessage = "Ajout impossible : ${e.message ?: "erreur inconnue"}"
                     )
                 }
             }
@@ -87,9 +136,30 @@ class ExposantViewModel(
     }
 
     fun updateExposant(exposantId: Int, formData: ExposantFormData) {
+        if (!NetworkUtils.isInternetAvailable(context)) {
+            _uiState.update { current ->
+                current.copy(
+                    isLoading = false,
+                    errorMessage = "Mode hors ligne : modification impossible"
+                )
+            }
+            return
+        }
+
         viewModelScope.launch {
+            _uiState.update { current ->
+                current.copy(
+                    isLoading = true,
+                    errorMessage = null
+                )
+            }
+
             try {
-                val currentExposant = repository.getExposantById(exposantId)
+                val currentExposant = try {
+                    repository.getExposantById(exposantId)
+                } catch (e: Exception) {
+                    repository.getLocalExposantById(exposantId)
+                }
 
                 if (currentExposant == null) {
                     _uiState.update { current ->
@@ -112,12 +182,14 @@ class ExposantViewModel(
                 )
 
                 repository.updateExposant(updatedExposant)
+                Log.d(TAG, "Exposant modifié id=$exposantId")
                 refreshExposants()
             } catch (e: Exception) {
+                Log.e(TAG, "Erreur modification exposant", e)
                 _uiState.update { current ->
                     current.copy(
                         isLoading = false,
-                        errorMessage = e.message ?: "Erreur lors de la modification de l'exposant"
+                        errorMessage = "Modification impossible : ${e.message ?: "erreur inconnue"}"
                     )
                 }
             }
@@ -125,7 +197,24 @@ class ExposantViewModel(
     }
 
     fun deleteExposantById(exposantId: Int) {
+        if (!NetworkUtils.isInternetAvailable(context)) {
+            _uiState.update { current ->
+                current.copy(
+                    isLoading = false,
+                    errorMessage = "Mode hors ligne : suppression impossible"
+                )
+            }
+            return
+        }
+
         viewModelScope.launch {
+            _uiState.update { current ->
+                current.copy(
+                    isLoading = true,
+                    errorMessage = null
+                )
+            }
+
             try {
                 val deleted = repository.deleteExposant(exposantId)
 
@@ -139,12 +228,14 @@ class ExposantViewModel(
                     return@launch
                 }
 
+                Log.d(TAG, "Exposant supprimé id=$exposantId")
                 refreshExposants()
             } catch (e: Exception) {
+                Log.e(TAG, "Erreur suppression exposant", e)
                 _uiState.update { current ->
                     current.copy(
                         isLoading = false,
-                        errorMessage = e.message ?: "Erreur lors de la suppression de l'exposant"
+                        errorMessage = "Suppression impossible"
                     )
                 }
             }
@@ -154,6 +245,7 @@ class ExposantViewModel(
     private suspend fun refreshExposants() {
         try {
             val exposants = repository.getExposants()
+            Log.d(TAG, "Refresh exposants depuis le back : ${exposants.size}")
             _uiState.update { current ->
                 current.copy(
                     isLoading = false,
@@ -162,11 +254,25 @@ class ExposantViewModel(
                 )
             }
         } catch (e: Exception) {
-            _uiState.update { current ->
-                current.copy(
-                    isLoading = false,
-                    errorMessage = e.message ?: "Erreur lors de l'actualisation des exposants"
-                )
+            Log.e(TAG, "Erreur refresh back, tentative Room", e)
+
+            try {
+                val localExposants = repository.getLocalExposants()
+                _uiState.update { current ->
+                    current.copy(
+                        isLoading = false,
+                        exposants = localExposants,
+                        errorMessage = null
+                    )
+                }
+            } catch (localException: Exception) {
+                Log.e(TAG, "Erreur refresh Room", localException)
+                _uiState.update { current ->
+                    current.copy(
+                        isLoading = false,
+                        errorMessage = "Erreur lors de l'actualisation des exposants"
+                    )
+                }
             }
         }
     }

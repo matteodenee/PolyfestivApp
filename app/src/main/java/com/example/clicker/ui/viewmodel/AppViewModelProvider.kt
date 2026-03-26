@@ -66,6 +66,7 @@ object AppViewModelProvider {
         initializer {
             ExposantViewModel(
                 repository = clickerApplication().container.exposantRepository
+                clickerApplication().applicationContext
             )
         }
           
