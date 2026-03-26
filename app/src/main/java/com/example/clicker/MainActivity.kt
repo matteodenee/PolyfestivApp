@@ -14,9 +14,10 @@ import com.example.clicker.ui.theme.ClickerTheme
 const val TAG = "DaMS4"
 
 class MainActivity : ComponentActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
-        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
 
         Log.d(TAG, "onCreate")
 

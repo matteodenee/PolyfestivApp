@@ -1,6 +1,7 @@
 package com.example.clicker.data.network
 
 import com.example.clicker.data.auth.AuthApiService
+import com.example.clicker.data.exposants.ExposantApiService
 import com.example.clicker.data.game.GamesApiService
 import kotlinx.serialization.json.Json
 import okhttp3.Interceptor
@@ -57,5 +58,9 @@ object RetrofitInstance {
 
     val gamesApi: GamesApiService by lazy {
         retrofit.create(GamesApiService::class.java)
+    }
+
+    val exposantApi: ExposantApiService by lazy {
+        retrofit.create(ExposantApiService::class.java)
     }
 }

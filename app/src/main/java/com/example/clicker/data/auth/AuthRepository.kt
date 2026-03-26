@@ -55,6 +55,7 @@ class AuthRepository(private val api: AuthApiService) {
         if (!response.isSuccessful) {
             return null
         }
+
         val cookies = response.headers().values("Set-Cookie")
         return cookies
             .find { it.startsWith("access_token=") }

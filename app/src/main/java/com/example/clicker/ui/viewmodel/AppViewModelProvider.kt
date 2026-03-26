@@ -1,11 +1,11 @@
 package com.example.clicker.ui.viewmodel
 
-
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory
 import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.clicker.ClickerApplication
+import com.example.clicker.ui.screens.exposants.ExposantViewModel
 import com.example.clicker.ui.screens.gameCreate.GameCreateViewModel
 import com.example.clicker.ui.screens.gameDetail.GameDetailViewModel
 import com.example.clicker.ui.screens.gameEdit.GameEditViewModel
@@ -19,14 +19,16 @@ object AppViewModelProvider {
             LoginViewModel(
                 clickerApplication().container.authRepository,
                 clickerApplication().sessionPreferencesRepository,
-                clickerApplication().applicationContext // applicationContext vit aussi longtemps que l'application
+                clickerApplication().applicationContext
             )
         }
+
         initializer {
             RegisterViewModel(
                 clickerApplication().container.authRepository
             )
         }
+
         initializer {
             GamesViewModel(
                 clickerApplication().container.gamesRepository
@@ -51,6 +53,12 @@ object AppViewModelProvider {
             GameCreateViewModel(
                 clickerApplication().container.gamesRepository,
                 clickerApplication().applicationContext
+            )
+        }
+
+        initializer {
+            ExposantViewModel(
+                repository = clickerApplication().container.exposantRepository
             )
         }
     }
