@@ -29,9 +29,12 @@ class ExposantViewModel(
 
     fun loadExposants() {
         viewModelScope.launch {
+            val isOnline = NetworkUtils.isInternetAvailable(context)
+
             _uiState.update { current ->
                 current.copy(
                     isLoading = true,
+                    isOnline = isOnline,
                     errorMessage = null
                 )
             }
@@ -42,6 +45,7 @@ class ExposantViewModel(
                 _uiState.update { current ->
                     current.copy(
                         isLoading = false,
+                        isOnline = true,
                         exposants = exposants,
                         errorMessage = null
                     )
@@ -56,6 +60,7 @@ class ExposantViewModel(
                         _uiState.update { current ->
                             current.copy(
                                 isLoading = false,
+                                isOnline = false,
                                 exposants = localExposants,
                                 errorMessage = null
                             )
@@ -64,6 +69,7 @@ class ExposantViewModel(
                         _uiState.update { current ->
                             current.copy(
                                 isLoading = false,
+                                isOnline = false,
                                 errorMessage = "Impossible de charger les exposants et aucune donnée locale n'est disponible"
                             )
                         }
@@ -73,6 +79,7 @@ class ExposantViewModel(
                     _uiState.update { current ->
                         current.copy(
                             isLoading = false,
+                            isOnline = false,
                             errorMessage = "Impossible de charger les exposants"
                         )
                     }
@@ -92,6 +99,7 @@ class ExposantViewModel(
             _uiState.update { current ->
                 current.copy(
                     isLoading = false,
+                    isOnline = false,
                     errorMessage = "Mode hors ligne : création impossible"
                 )
             }
@@ -102,6 +110,7 @@ class ExposantViewModel(
             _uiState.update { current ->
                 current.copy(
                     isLoading = true,
+                    isOnline = true,
                     errorMessage = null
                 )
             }
@@ -140,6 +149,7 @@ class ExposantViewModel(
             _uiState.update { current ->
                 current.copy(
                     isLoading = false,
+                    isOnline = false,
                     errorMessage = "Mode hors ligne : modification impossible"
                 )
             }
@@ -150,6 +160,7 @@ class ExposantViewModel(
             _uiState.update { current ->
                 current.copy(
                     isLoading = true,
+                    isOnline = true,
                     errorMessage = null
                 )
             }
@@ -157,7 +168,7 @@ class ExposantViewModel(
             try {
                 val currentExposant = try {
                     repository.getExposantById(exposantId)
-                } catch (e: Exception) {
+                } catch (_: Exception) {
                     repository.getLocalExposantById(exposantId)
                 }
 
@@ -201,6 +212,7 @@ class ExposantViewModel(
             _uiState.update { current ->
                 current.copy(
                     isLoading = false,
+                    isOnline = false,
                     errorMessage = "Mode hors ligne : suppression impossible"
                 )
             }
@@ -211,6 +223,7 @@ class ExposantViewModel(
             _uiState.update { current ->
                 current.copy(
                     isLoading = true,
+                    isOnline = true,
                     errorMessage = null
                 )
             }
@@ -249,6 +262,7 @@ class ExposantViewModel(
             _uiState.update { current ->
                 current.copy(
                     isLoading = false,
+                    isOnline = true,
                     exposants = exposants,
                     errorMessage = null
                 )
@@ -261,6 +275,7 @@ class ExposantViewModel(
                 _uiState.update { current ->
                     current.copy(
                         isLoading = false,
+                        isOnline = false,
                         exposants = localExposants,
                         errorMessage = null
                     )
@@ -270,6 +285,7 @@ class ExposantViewModel(
                 _uiState.update { current ->
                     current.copy(
                         isLoading = false,
+                        isOnline = false,
                         errorMessage = "Erreur lors de l'actualisation des exposants"
                     )
                 }

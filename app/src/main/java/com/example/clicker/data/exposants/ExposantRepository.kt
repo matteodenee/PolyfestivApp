@@ -1,13 +1,13 @@
 package com.example.clicker.data.exposants
 
-import com.example.clicker.data.local.exposant.ExposantDao
-import com.example.clicker.data.local.exposant.toEntity
-import com.example.clicker.data.local.exposant.toExposant
+import com.example.clicker.data.local.exposants.ActorDao
+import com.example.clicker.data.local.exposants.toEntity
+import com.example.clicker.data.local.exposants.toExposant
 import retrofit2.HttpException
 
 class ExposantRepository(
     private val api: ExposantApiService,
-    private val exposantDao: ExposantDao
+    private val exposantDao: ActorDao
 ) {
 
     suspend fun getExposants(): List<Exposant> {

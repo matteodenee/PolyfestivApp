@@ -4,6 +4,7 @@ import com.example.clicker.data.exposants.Exposant
 
 data class ExposantUiState(
     val isLoading: Boolean = true,
+    val isOnline: Boolean = true,
     val exposants: List<Exposant> = emptyList(),
     val searchQuery: String = "",
     val errorMessage: String? = null
@@ -14,8 +15,8 @@ data class ExposantUiState(
 
             return exposants.filter { exposant ->
                 exposant.name.contains(searchQuery, ignoreCase = true) ||
-                    exposant.actorType.any { it.contains(searchQuery, ignoreCase = true) } ||
-                    exposant.description.orEmpty().contains(searchQuery, ignoreCase = true)
+                        exposant.actorType.any { it.contains(searchQuery, ignoreCase = true) } ||
+                        exposant.description.orEmpty().contains(searchQuery, ignoreCase = true)
             }
         }
 
