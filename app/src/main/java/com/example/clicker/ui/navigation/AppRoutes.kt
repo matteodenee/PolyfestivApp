@@ -11,4 +11,5 @@ sealed interface AppRoutes {
     data object ExposantCreateRoute : AppRoutes
     data class ExposantDetailRoute(val exposantId: Int) : AppRoutes
     data class ExposantEditRoute(val exposantId: Int) : AppRoutes
+    data class ReservationsRoute(val festivalId: Int) : AppRoutes
 }
