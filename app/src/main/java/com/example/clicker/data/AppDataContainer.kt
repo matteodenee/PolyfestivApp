@@ -8,6 +8,9 @@ import com.example.clicker.data.local.game.GameDatabase
 import com.example.clicker.data.network.RetrofitInstance
 import com.example.clicker.data.admin.AdminRepository
 import com.example.clicker.data.reservation.ReservationsRepository
+import com.example.clicker.data.reservationGame.ReservationGameRepository
+import com.example.clicker.data.reservationTariffzoneAllocation.ReservationTariffzoneAllocationRepository
+import com.example.clicker.data.tarifZone.TarifZoneRepository
 
 class AppDataContainer(
     private val context: Context
@@ -34,5 +37,17 @@ class AppDataContainer(
 
     override val reservationsRepository: ReservationsRepository by lazy {
         ReservationsRepository(RetrofitInstance.reservationsApi)
+    }
+
+    override val reservationTariffzoneAllocationRepository: ReservationTariffzoneAllocationRepository by lazy {
+        ReservationTariffzoneAllocationRepository(RetrofitInstance.reservationTariffzoneAllocationApi)
+    }
+
+    override val reservationGameRepository: ReservationGameRepository by lazy {
+        ReservationGameRepository(RetrofitInstance.reservationGameApi)
+    }
+
+    override val tarifZoneRepository: TarifZoneRepository by lazy {
+        TarifZoneRepository(RetrofitInstance.tarifZoneApi)
     }
 }
