@@ -30,5 +30,5 @@ interface ReservationsApiService {
     @DELETE("api/reservations/{id}")
     suspend fun deleteReservation(
         @Path("id") id: Int
-    ): Response<Unit>
+    )
 }
