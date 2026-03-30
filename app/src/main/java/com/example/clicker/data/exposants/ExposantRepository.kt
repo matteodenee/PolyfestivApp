@@ -28,6 +28,30 @@ class ExposantRepository(
         }
     }
 
+    suspend fun getExposantsByFestival(festivalId: Int): List<FestivalExposantItem> {
+        val links = api.getExposantLinksByFestival(festivalId)
+        val linksByActorId = links.associateBy { it.actorId }
+
+        val exposants = linksByActorId.keys.mapNotNull { actorId ->
+            runCatching { api.getExposantById(actorId) }
+                .getOrNull()
+                ?.toExposant()
+                ?.also { exposant ->
+                    exposantDao.insertExposant(exposant.toActorDto().toEntity())
+                }
+                ?.let { exposant ->
+                    val link = linksByActorId[actorId]
+                    FestivalExposantItem(
+                        exposant = exposant,
+                        contacted = link?.contacted == true,
+                        status = link?.status
+                    )
+                }
+        }
+
+        return exposants.sortedBy { it.exposant.name.lowercase() }
+    }
+
     suspend fun getLocalExposants(): List<Exposant> {
         return exposantDao.getAllExposants()
             .map { it.toDto().toExposant() }

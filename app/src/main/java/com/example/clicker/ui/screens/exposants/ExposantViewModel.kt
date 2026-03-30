@@ -19,6 +19,10 @@ class ExposantViewModel(
     private val _uiState = MutableStateFlow<ExposantUiState>(ExposantUiState.Loading)
     val uiState: StateFlow<ExposantUiState> = _uiState.asStateFlow()
 
+    private val _festivalUiState =
+        MutableStateFlow<FestivalExposantsUiState>(FestivalExposantsUiState.Loading)
+    val festivalUiState: StateFlow<FestivalExposantsUiState> = _festivalUiState.asStateFlow()
+
     fun loadExposants() {
         viewModelScope.launch {
             _uiState.value = ExposantUiState.Loading
@@ -42,6 +46,20 @@ class ExposantViewModel(
                         e.message ?: "Erreur chargement exposants"
                     )
                 }
+            }
+        }
+    }
+
+    fun loadExposantsByFestival(festivalId: Int) {
+        viewModelScope.launch {
+            _festivalUiState.value = FestivalExposantsUiState.Loading
+            try {
+                val exposants = repository.getExposantsByFestival(festivalId)
+                _festivalUiState.value = FestivalExposantsUiState.Success(exposants)
+            } catch (e: Exception) {
+                _festivalUiState.value = FestivalExposantsUiState.Error(
+                    e.message ?: "Erreur chargement exposants du festival"
+                )
             }
         }
     }

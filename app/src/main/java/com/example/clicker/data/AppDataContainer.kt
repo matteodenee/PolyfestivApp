@@ -27,6 +27,7 @@ class AppDataContainer(
     override val gamesRepository: GamesRepository by lazy {
         GamesRepository(
             api = RetrofitInstance.gamesApi,
+            actorApi = RetrofitInstance.exposantApi,
             gameDao = GameDatabase.getDatabase(context).gameDao()
         )
     }

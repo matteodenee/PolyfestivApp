@@ -17,6 +17,11 @@ interface ExposantApiService {
         @Path("id") id: Int
     ): ActorDto
 
+    @GET("api/actor-festivals/{festivalId}/actors/links")
+    suspend fun getExposantLinksByFestival(
+        @Path("festivalId") festivalId: Int
+    ): List<ActorFestivalLinkDto>
+
     @POST("api/actors")
     suspend fun addExposant(
         @Body body: ActorRequest

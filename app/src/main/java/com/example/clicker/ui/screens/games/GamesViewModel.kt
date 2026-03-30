@@ -27,7 +27,7 @@ class GamesViewModel(
                 val games = gamesRepository.getGames()
                 Log.d(TAG, "Jeux chargés depuis le back : ${games.size}")
                 internalState.value = GamesUiState.Success(games)
-            } catch (e: Exception) { // si le réseau échoue, on passe au local
+            } catch (e: Exception) {
                 Log.e(TAG, "Erreur chargement back, tentative Room", e)
                 try {
                     val localGames = gamesRepository.getLocalGames()
