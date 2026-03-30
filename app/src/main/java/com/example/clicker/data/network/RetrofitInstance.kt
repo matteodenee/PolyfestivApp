@@ -10,6 +10,7 @@ import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
 import com.example.clicker.data.admin.AdminApiService
+import com.example.clicker.data.reservation.ReservationsApiService
 
 object RetrofitInstance {
 
@@ -66,5 +67,9 @@ object RetrofitInstance {
     }
     val exposantApi: ExposantApiService by lazy {
         retrofit.create(ExposantApiService::class.java)
+    }
+
+    val reservationsApi: ReservationsApiService by lazy {
+        retrofit.create(ReservationsApiService::class.java)
     }
 }
