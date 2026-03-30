@@ -1,4 +1,4 @@
-package com.example.clicker.data.local.exposant
+package com.example.clicker.data.local.exposants
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey

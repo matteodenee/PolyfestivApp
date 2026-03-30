@@ -21,16 +21,13 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircleOutline
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Storefront
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -52,7 +49,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.clicker.R
 import com.example.clicker.data.exposants.Exposant
 import com.example.clicker.data.exposants.typeLabel
-import com.example.clicker.ui.theme.SearchField
 import com.example.clicker.ui.viewmodel.AppViewModelProvider
 
 @Composable
@@ -103,36 +99,8 @@ fun ExposantsScreen(
                 .fillMaxSize()
                 .padding(horizontal = 22.dp)
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "Exposants",
-                    style = MaterialTheme.typography.headlineMedium.copy(
-                        fontWeight = FontWeight.SemiBold,
-                        color = colors.onBackground
-                    )
-                )
-
-                AddExposantButton(
-                    enabled = uiState.isOnline,
-                    onClick = onAddClick
-                )
-            }
-
-            Spacer(modifier = Modifier.height(18.dp))
-
-            ExposantsSearchBar(
-                value = uiState.searchQuery,
-                onValueChange = exposantViewModel::onSearchQueryChange
-            )
-
-            Spacer(modifier = Modifier.height(14.dp))
-
-            when {
-                uiState.isLoading -> {
+            when (val state = uiState) {
+                ExposantUiState.Loading -> {
                     Box(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
@@ -141,19 +109,45 @@ fun ExposantsScreen(
                     }
                 }
 
-                uiState.errorMessage != null -> {
-                    Text(
-                        text = uiState.errorMessage ?: "Erreur inconnue",
-                        color = MaterialTheme.colorScheme.error
-                    )
+                is ExposantUiState.Error -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = state.message,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    }
                 }
 
-                else -> {
+                is ExposantUiState.Success -> {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = "Exposants",
+                            style = MaterialTheme.typography.headlineMedium.copy(
+                                fontWeight = FontWeight.SemiBold,
+                                color = colors.onBackground
+                            )
+                        )
+
+                        AddExposantButton(
+                            enabled = state.isOnline,
+                            onClick = onAddClick
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(18.dp))
+
                     LazyColumn(
                         state = listState,
                         modifier = Modifier.weight(1f)
                     ) {
-                        items(uiState.filteredExposants) { exposant ->
+                        items(state.exposants) { exposant ->
                             ExposantItem(
                                 exposant = exposant,
                                 onClick = { onDetailsClick(exposant.id) }
@@ -216,44 +210,6 @@ private fun ExposantsHeaderSection(height: Dp) {
             modifier = Modifier.fillMaxSize()
         )
     }
-}
-
-@Composable
-private fun ExposantsSearchBar(
-    value: String,
-    onValueChange: (String) -> Unit
-) {
-    val colors = MaterialTheme.colorScheme
-
-    OutlinedTextField(
-        value = value,
-        onValueChange = onValueChange,
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(27.dp)),
-        placeholder = {
-            Text(
-                text = "Rechercher un exposant",
-                color = colors.onSurface.copy(alpha = 0.7f)
-            )
-        },
-        leadingIcon = {
-            Icon(
-                imageVector = Icons.Default.Search,
-                contentDescription = "Recherche",
-                tint = colors.onSurface
-            )
-        },
-        singleLine = true,
-        shape = RoundedCornerShape(27.dp),
-        colors = TextFieldDefaults.colors(
-            focusedContainerColor = SearchField,
-            unfocusedContainerColor = SearchField,
-            focusedIndicatorColor = Color.Transparent,
-            unfocusedIndicatorColor = Color.Transparent,
-            cursorColor = colors.onSurface
-        )
-    )
 }
 
 @Composable

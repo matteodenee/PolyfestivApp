@@ -62,14 +62,14 @@ object AppViewModelProvider {
                 clickerApplication().container.adminRepository
             )
         }
-        
+
         initializer {
             ExposantViewModel(
-                repository = clickerApplication().container.exposantRepository
+                clickerApplication().container.exposantRepository,
                 clickerApplication().applicationContext
             )
         }
-          
+
     }
 }
 

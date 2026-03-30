@@ -1,12 +1,13 @@
 package com.example.clicker.data
 
 import android.content.Context
+import com.example.clicker.data.admin.AdminRepository
 import com.example.clicker.data.auth.AuthRepository
 import com.example.clicker.data.exposants.ExposantRepository
 import com.example.clicker.data.game.GamesRepository
+import com.example.clicker.data.local.exposants.ExposantDatabase
 import com.example.clicker.data.local.game.GameDatabase
 import com.example.clicker.data.network.RetrofitInstance
-import com.example.clicker.data.admin.AdminRepository
 
 class AppDataContainer(
     private val context: Context
@@ -17,7 +18,10 @@ class AppDataContainer(
     }
 
     override val exposantRepository: ExposantRepository by lazy {
-        ExposantRepository(RetrofitInstance.exposantApi)
+        ExposantRepository(
+            api = RetrofitInstance.exposantApi,
+            exposantDao = ExposantDatabase.getDatabase(context).exposantDao()
+        )
     }
 
     override val gamesRepository: GamesRepository by lazy {

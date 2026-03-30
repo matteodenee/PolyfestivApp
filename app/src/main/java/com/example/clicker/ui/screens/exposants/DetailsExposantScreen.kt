@@ -18,9 +18,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.clicker.data.exposants.Exposant
+import com.example.clicker.data.exposants.typeLabel
 import com.example.clicker.ui.theme.ButtonBlue
 import com.example.clicker.ui.theme.ButtonOrange
-import com.example.clicker.data.exposants.typeLabel
 
 @Composable
 fun DetailsExposantScreen(
@@ -28,6 +28,7 @@ fun DetailsExposantScreen(
     onBackClick: () -> Unit,
     onEditClick: () -> Unit,
     onDeleteClick: () -> Unit,
+    isOnline: Boolean,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -61,6 +62,7 @@ fun DetailsExposantScreen(
         ) {
             Button(
                 onClick = onEditClick,
+                enabled = isOnline,
                 modifier = Modifier.weight(1f),
                 colors = ButtonDefaults.buttonColors(containerColor = ButtonBlue)
             ) {
@@ -69,6 +71,7 @@ fun DetailsExposantScreen(
 
             Button(
                 onClick = onDeleteClick,
+                enabled = isOnline,
                 modifier = Modifier.weight(1f),
                 colors = ButtonDefaults.buttonColors(containerColor = ButtonOrange)
             ) {

@@ -98,9 +98,6 @@ fun ClickerNavHost(
                                 Destination.JEUX -> "Jeux"
                                 Destination.EXPOSANTS -> "Exposants"
                                 Destination.ADMIN -> "Admin"
-                                AppRoutes.GameCreateRoute -> "Ajout"
-                                is AppRoutes.GameDetailRoute -> "Détail"
-                                is AppRoutes.GameEditRoute -> "Modification"
                                 AppRoutes.GameCreateRoute,
                                 AppRoutes.ExposantCreateRoute -> "Ajout"
                                 is AppRoutes.GameDetailRoute,
@@ -247,7 +244,12 @@ fun ClickerNavHost(
                             ExposantsScreen(
                                 exposantViewModel = exposantViewModel,
                                 onAddClick = {
-                                    backStack.add(AppRoutes.ExposantCreateRoute)
+                                    val isOnline =
+                                        (exposantUiState as? com.example.clicker.ui.screens.exposants.ExposantUiState.Success)?.isOnline == true
+
+                                    if (isOnline) {
+                                        backStack.add(AppRoutes.ExposantCreateRoute)
+                                    }
                                 },
                                 onDetailsClick = { exposantId ->
                                     backStack.add(AppRoutes.ExposantDetailRoute(exposantId))
@@ -333,6 +335,9 @@ fun ClickerNavHost(
                     }
 
                     AppRoutes.ExposantCreateRoute -> NavEntry(key) {
+                        val isOnline =
+                            (exposantUiState as? com.example.clicker.ui.screens.exposants.ExposantUiState.Success)?.isOnline == true
+
                         Box(modifier = Modifier.padding(innerPadding)) {
                             ExposantFormScreen(
                                 mode = ExposantFormMode.CREATE,
@@ -341,19 +346,23 @@ fun ClickerNavHost(
                                     backStack.removeLastOrNull()
                                 },
                                 onSaveClick = { formData ->
-                                    exposantViewModel.saveNewExposant(formData)
-                                    backStack.removeLastOrNull()
-                                }
+                                    exposantViewModel.saveNewExposant(formData) {
+                                        backStack.removeLastOrNull()
+                                    }
+                                },
+                                isOnline = isOnline
                             )
                         }
                     }
 
                     is AppRoutes.ExposantDetailRoute -> NavEntry(key) {
-                        val exposant = exposantUiState.findExposantById(key.exposantId)
+                        val exposantState = exposantUiState as? com.example.clicker.ui.screens.exposants.ExposantUiState.Success
+                        val exposant = exposantState?.exposants?.find { it.id == key.exposantId }
+                        val isOnline = exposantState?.isOnline == true
 
                         Box(modifier = Modifier.padding(innerPadding)) {
                             when {
-                                exposantUiState.isLoading -> {
+                                exposantUiState is com.example.clicker.ui.screens.exposants.ExposantUiState.Loading -> {
                                     Box(
                                         modifier = Modifier.fillMaxSize(),
                                         contentAlignment = Alignment.Center
@@ -381,9 +390,11 @@ fun ClickerNavHost(
                                             backStack.add(AppRoutes.ExposantEditRoute(key.exposantId))
                                         },
                                         onDeleteClick = {
-                                            exposantViewModel.deleteExposantById(key.exposantId)
-                                            backStack.removeLastOrNull()
+                                            exposantViewModel.deleteExposantById(key.exposantId) {
+                                                backStack.removeLastOrNull()
+                                            }
                                         },
+                                        isOnline = isOnline,
                                         modifier = Modifier.fillMaxSize()
                                     )
                                 }
@@ -392,11 +403,13 @@ fun ClickerNavHost(
                     }
 
                     is AppRoutes.ExposantEditRoute -> NavEntry(key) {
-                        val exposant = exposantUiState.findExposantById(key.exposantId)
+                        val exposantState = exposantUiState as? com.example.clicker.ui.screens.exposants.ExposantUiState.Success
+                        val exposant = exposantState?.exposants?.find { it.id == key.exposantId }
+                        val isOnline = exposantState?.isOnline == true
 
                         Box(modifier = Modifier.padding(innerPadding)) {
                             when {
-                                exposantUiState.isLoading -> {
+                                exposantUiState is com.example.clicker.ui.screens.exposants.ExposantUiState.Loading -> {
                                     Box(
                                         modifier = Modifier.fillMaxSize(),
                                         contentAlignment = Alignment.Center
@@ -422,9 +435,11 @@ fun ClickerNavHost(
                                             backStack.removeLastOrNull()
                                         },
                                         onSaveClick = { formData ->
-                                            exposantViewModel.updateExposant(key.exposantId, formData)
-                                            backStack.removeLastOrNull()
-                                        }
+                                            exposantViewModel.updateExposant(key.exposantId, formData) {
+                                                backStack.removeLastOrNull()
+                                            }
+                                        },
+                                        isOnline = isOnline
                                     )
                                 }
                             }
