@@ -13,6 +13,7 @@ import com.example.clicker.ui.screens.games.GamesViewModel
 import com.example.clicker.ui.screens.login.LoginViewModel
 import com.example.clicker.ui.screens.register.RegisterViewModel
 import com.example.clicker.ui.screens.admin.AdminViewModel
+import com.example.clicker.ui.screens.reservationDetail.ReservationDetailViewModel
 import com.example.clicker.ui.screens.reservations.ReservationsViewModel
 
 object AppViewModelProvider {
@@ -78,6 +79,12 @@ object AppViewModelProvider {
             )
         }
 
+        initializer {
+            ReservationDetailViewModel(
+                clickerApplication().container.reservationsRepository,
+                clickerApplication().container.exposantRepository,
+            )
+        }
     }
 }
 
