@@ -15,6 +15,7 @@ import com.example.clicker.ui.screens.register.RegisterViewModel
 import com.example.clicker.ui.screens.admin.AdminViewModel
 import com.example.clicker.ui.screens.reservationDetail.ReservationDetailViewModel
 import com.example.clicker.ui.screens.reservations.ReservationsViewModel
+import com.example.clicker.ui.screens.reservationCreate.ReservationCreateViewModel
 
 object AppViewModelProvider {
     val Factory = viewModelFactory {
@@ -85,7 +86,14 @@ object AppViewModelProvider {
                 clickerApplication().container.exposantRepository,
             )
         }
-    }
+
+        initializer {
+            ReservationCreateViewModel(
+                clickerApplication().container.exposantRepository,
+                clickerApplication().container.reservationsRepository,
+                clickerApplication().container.festivalsRepository
+            )
+        }
 }
 
 fun CreationExtras.clickerApplication(): ClickerApplication =
