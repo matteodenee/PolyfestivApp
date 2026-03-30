@@ -11,6 +11,9 @@ import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
 import com.example.clicker.data.admin.AdminApiService
 import com.example.clicker.data.reservation.ReservationsApiService
+import com.example.clicker.data.reservationGame.ReservationGameApiService
+import com.example.clicker.data.reservationTariffzoneAllocation.ReservationTariffzoneAllocationApiService
+import com.example.clicker.data.tarifZone.TarifZoneApiService
 
 object RetrofitInstance {
 
@@ -71,5 +74,19 @@ object RetrofitInstance {
 
     val reservationsApi: ReservationsApiService by lazy {
         retrofit.create(ReservationsApiService::class.java)
+    }
+
+    val reservationTariffzoneAllocationApi: ReservationTariffzoneAllocationApiService by lazy {
+        retrofit.create(ReservationTariffzoneAllocationApiService::class.java)
+    }
+
+
+    val reservationGameApi: ReservationGameApiService by lazy {
+        retrofit.create(ReservationGameApiService::class.java)
+    }
+
+
+    val tarifZoneApi: TarifZoneApiService by lazy {
+        retrofit.create(TarifZoneApiService::class.java)
     }
 }
