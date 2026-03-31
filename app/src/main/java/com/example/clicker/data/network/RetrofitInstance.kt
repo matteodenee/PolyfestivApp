@@ -14,6 +14,7 @@ import com.example.clicker.data.reservation.ReservationsApiService
 import com.example.clicker.data.reservationGame.ReservationGameApiService
 import com.example.clicker.data.reservationTariffzoneAllocation.ReservationTariffzoneAllocationApiService
 import com.example.clicker.data.tarifZone.TarifZoneApiService
+import com.example.clicker.data.reservationNote.ReservationNoteApiService
 
 object RetrofitInstance {
 
@@ -88,5 +89,8 @@ object RetrofitInstance {
 
     val tarifZoneApi: TarifZoneApiService by lazy {
         retrofit.create(TarifZoneApiService::class.java)
+    }
+    val reservationNoteApi: ReservationNoteApiService by lazy {
+        retrofit.create(ReservationNoteApiService::class.java)
     }
 }
