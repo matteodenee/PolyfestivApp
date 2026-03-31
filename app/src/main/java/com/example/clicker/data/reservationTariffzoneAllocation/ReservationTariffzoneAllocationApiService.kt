@@ -23,4 +23,10 @@ interface ReservationTariffzoneAllocationApiService {
     suspend fun deleteAllocation(
         @Path("id") id: Int
     )
+
+    @POST("api/reservation-tariffzone-allocations/{id}")
+    suspend fun updateAllocation(
+        @Path("id") id: Int,
+        @Body request: ReservationTariffzoneAllocationRequest
+    ): ReservationTariffzoneAllocationDto
 }

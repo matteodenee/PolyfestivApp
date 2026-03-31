@@ -16,4 +16,11 @@ class ReservationTariffzoneAllocationRepository(
     suspend fun deleteAllocation(id: Int) {
         api.deleteAllocation(id)
     }
+
+    suspend fun updateAllocation(
+        id: Int,
+        request: ReservationTariffzoneAllocationRequest
+    ): ReservationTariffzoneAllocationDto {
+        return api.updateAllocation(id, request)
+    }
 }

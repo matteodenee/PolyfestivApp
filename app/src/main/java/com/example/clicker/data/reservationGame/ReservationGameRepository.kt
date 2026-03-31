@@ -16,4 +16,11 @@ class ReservationGameRepository(
     suspend fun deleteReservationGame(id: Int) {
         api.deleteReservationGame(id)
     }
+
+    suspend fun updateReservationGame(
+        id: Int,
+        request: ReservationGameRequest
+    ): ReservationGameDto {
+        return api.updateReservationGame(id, request)
+    }
 }

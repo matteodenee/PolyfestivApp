@@ -23,4 +23,10 @@ interface ReservationGameApiService {
     suspend fun deleteReservationGame(
         @Path("id") id: Int
     )
+
+    @POST("api/reservation-games/{id}")
+    suspend fun updateReservationGame(
+        @Path("id") id: Int,
+        @Body request: ReservationGameRequest
+    ): ReservationGameDto
 }
