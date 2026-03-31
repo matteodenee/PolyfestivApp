@@ -1,5 +1,7 @@
 package com.example.clicker.ui.navigation
 
+import com.example.clicker.data.reservation.ReservationDto
+
 sealed interface AppRoutes {
     data object LOGIN : AppRoutes
     data object REGISTER : AppRoutes
@@ -13,4 +15,6 @@ sealed interface AppRoutes {
     data class ExposantEditRoute(val exposantId: Int) : AppRoutes
     data class ReservationsRoute(val festivalId: Int) : AppRoutes
     data class ReservationCreateRoute(val festivalId: Int) : AppRoutes
+    data class ReservationDetailRoute(val reservation: ReservationDto) : AppRoutes
+    data class ReservationSuppliesRoute(val reservation: ReservationDto) : AppRoutes
 }
