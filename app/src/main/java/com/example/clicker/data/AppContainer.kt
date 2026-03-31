@@ -8,6 +8,7 @@ import com.example.clicker.data.reservation.ReservationsRepository
 import com.example.clicker.data.reservationGame.ReservationGameRepository
 import com.example.clicker.data.reservationTariffzoneAllocation.ReservationTariffzoneAllocationRepository
 import com.example.clicker.data.tarifZone.TarifZoneRepository
+import com.example.clicker.data.reservationNote.ReservationNoteRepository
 
 interface AppContainer {
     val authRepository: AuthRepository
@@ -18,4 +19,5 @@ interface AppContainer {
     val reservationTariffzoneAllocationRepository: ReservationTariffzoneAllocationRepository
     val reservationGameRepository: ReservationGameRepository
     val tarifZoneRepository: TarifZoneRepository
+    val reservationNoteRepository: ReservationNoteRepository
 }
