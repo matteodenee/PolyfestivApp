@@ -16,6 +16,10 @@ import com.example.clicker.ui.screens.admin.AdminViewModel
 import com.example.clicker.ui.screens.reservationDetail.ReservationDetailViewModel
 import com.example.clicker.ui.screens.reservations.ReservationsViewModel
 import com.example.clicker.ui.screens.reservationCreate.ReservationCreateViewModel
+import com.example.clicker.ui.screens.reservationSupplies.ReservationSuppliesViewModel
+import com.example.clicker.ui.screens.reservationNote.ReservationNoteViewModel
+import com.example.clicker.ui.screens.reservationContact.ReservationContactViewModel
+import com.example.clicker.ui.screens.reservationInvoice.ReservationInvoiceViewModel
 
 object AppViewModelProvider {
     val Factory = viewModelFactory {
@@ -94,6 +98,40 @@ object AppViewModelProvider {
                 clickerApplication().container.festivalsRepository
             )
         }
+
+        initializer {
+            ReservationSuppliesViewModel(
+                clickerApplication().container.tarifZoneRepository,
+                clickerApplication().container.reservationTariffzoneAllocationRepository,
+                clickerApplication().container.reservationGameRepository,
+                clickerApplication().container.gamesRepository,
+                clickerApplication().container.reservationsRepository
+            )
+        }
+
+        initializer {
+            ReservationNoteViewModel(
+                clickerApplication().container.reservationNoteRepository
+            )
+        }
+
+        initializer {
+            ReservationContactViewModel(
+                clickerApplication().container.reservationContactRepository,
+                clickerApplication().container.reservationsRepository
+            )
+        }
+
+        initializer {
+            ReservationInvoiceViewModel(
+                clickerApplication().container.invoiceRepository,
+                clickerApplication().container.tarifZoneRepository,
+                clickerApplication().container.reservationTariffzoneAllocationRepository,
+                clickerApplication().container.reservationGameRepository,
+                clickerApplication().container.equipmentRepository
+            )
+        }
+    }
 }
 
 fun CreationExtras.clickerApplication(): ClickerApplication =
