@@ -31,7 +31,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -55,9 +54,9 @@ fun ReservationDetailScreen(
     modifier: Modifier = Modifier,
     viewModel: ReservationDetailViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
-    val uiState by viewModel.state
-    val reservantName by viewModel.reservantName
-    val reservantType by viewModel.reservantType
+    val uiState = viewModel.state.value
+    val reservantName = viewModel.reservantName.value
+    val reservantType = viewModel.reservantType.value
 
     LaunchedEffect(reservation.reservantId) {
         viewModel.loadReservantInfo(reservation.reservantId)
