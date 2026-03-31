@@ -17,4 +17,7 @@ sealed interface AppRoutes {
     data class ReservationCreateRoute(val festivalId: Int) : AppRoutes
     data class ReservationDetailRoute(val reservation: ReservationDto) : AppRoutes
     data class ReservationSuppliesRoute(val reservation: ReservationDto) : AppRoutes
+    data class ReservationContactRoute(val reservation: ReservationDto) : AppRoutes
+    data class ReservationNoteRoute(val reservation: ReservationDto) : AppRoutes
+    data class ReservationInvoiceRoute(val reservation: ReservationDto) : AppRoutes
 }
