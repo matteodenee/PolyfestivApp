@@ -5,14 +5,15 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.clicker.ClickerApplication
+import com.example.clicker.ui.screens.admin.AdminViewModel
 import com.example.clicker.ui.screens.exposants.ExposantViewModel
+import com.example.clicker.ui.screens.festivalGames.FestivalGamesViewModel
 import com.example.clicker.ui.screens.gameCreate.GameCreateViewModel
 import com.example.clicker.ui.screens.gameDetail.GameDetailViewModel
 import com.example.clicker.ui.screens.gameEdit.GameEditViewModel
 import com.example.clicker.ui.screens.games.GamesViewModel
 import com.example.clicker.ui.screens.login.LoginViewModel
 import com.example.clicker.ui.screens.register.RegisterViewModel
-import com.example.clicker.ui.screens.admin.AdminViewModel
 
 object AppViewModelProvider {
     val Factory = viewModelFactory {
@@ -32,6 +33,12 @@ object AppViewModelProvider {
 
         initializer {
             GamesViewModel(
+                clickerApplication().container.gamesRepository
+            )
+        }
+
+        initializer {
+            FestivalGamesViewModel(
                 clickerApplication().container.gamesRepository
             )
         }
@@ -69,7 +76,6 @@ object AppViewModelProvider {
                 clickerApplication().applicationContext
             )
         }
-
     }
 }
 

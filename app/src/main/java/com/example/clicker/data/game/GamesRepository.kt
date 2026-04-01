@@ -33,9 +33,10 @@ class GamesRepository(
 
     suspend fun getGamesByFestival(festivalId: Int): List<FestivalGameItem> {
         val links = api.getGamesByFestival(festivalId)
-        val distinctGameIds = links.map { it.gameId }.distinct()
 
-        val gamesById = distinctGameIds.mapNotNull { gameId ->
+        val gameIds = links.map { it.gameId }.distinct()
+
+        val gamesById = gameIds.mapNotNull { gameId ->
             runCatching { api.getGameById(gameId) }
                 .getOrNull()
                 ?.also { gameDao.insertGame(it.toEntity()) }
@@ -44,7 +45,7 @@ class GamesRepository(
 
         val actorIds = buildSet {
             links.mapNotNullTo(this) { it.editorActorId }
-            gamesById.values.mapTo(this) { it.editorId }
+            gamesById.values.mapNotNullTo(this) { it.editorId }
         }
 
         val actorNamesById = actorIds.mapNotNull { actorId ->
@@ -58,8 +59,8 @@ class GamesRepository(
 
             FestivalGameItem(
                 game = game,
-                editorName = actorNamesById[game.editorId],
-                reservantName = link.editorActorId?.let { actorNamesById[it] }
+                editorName = link.editorActorId?.let { actorNamesById[it] }
+                    ?: game.editorId?.let { actorNamesById[it] }
             )
         }
     }

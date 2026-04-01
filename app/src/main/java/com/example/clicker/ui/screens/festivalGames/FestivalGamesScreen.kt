@@ -25,6 +25,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -39,7 +40,7 @@ import com.example.clicker.ui.theme.SearchField
 import com.example.clicker.ui.viewmodel.AppViewModelProvider
 
 private enum class FestivalGamesSortColumn {
-    JEU, AUTEUR, EDITEUR, RESERVANT
+    JEU, AUTEUR, EDITEUR
 }
 
 @Composable
@@ -54,7 +55,7 @@ fun FestivalGamesScreen(
         viewModel.loadGamesByFestival(festivalId)
     }
 
-    val state = viewModel.state.value
+    val state by viewModel.uiState.collectAsState()
     val colors = MaterialTheme.colorScheme
     var searchQuery by remember { mutableStateOf("") }
     var sortColumn by remember { mutableStateOf(FestivalGamesSortColumn.JEU) }
@@ -135,10 +136,9 @@ fun FestivalGamesScreen(
 
                 val filtered = uiState.games.filter { item ->
                     query.isBlank() ||
-                            item.game.name.lowercase().contains(query) ||
-                            item.game.author.lowercase().contains(query) ||
-                            (item.editorName ?: "").lowercase().contains(query) ||
-                            (item.reservantName ?: "").lowercase().contains(query)
+                        item.game.name.lowercase().contains(query) ||
+                        item.game.author.lowercase().contains(query) ||
+                        (item.editorName ?: "").lowercase().contains(query)
                 }
 
                 val sorted = when (sortColumn) {
@@ -150,9 +150,6 @@ fun FestivalGamesScreen(
 
                     FestivalGamesSortColumn.EDITEUR ->
                         filtered.sortedBy { (it.editorName ?: "").lowercase() }
-
-                    FestivalGamesSortColumn.RESERVANT ->
-                        filtered.sortedBy { (it.reservantName ?: "").lowercase() }
                 }.let { if (ascending) it else it.reversed() }
 
                 Column(
@@ -204,23 +201,18 @@ private fun FestivalGamesHeaderRow(
         ) {
             FestivalGamesHeaderCell(
                 text = sortLabel("Jeu", FestivalGamesSortColumn.JEU, currentSort, ascending),
-                modifier = Modifier.width(160.dp),
+                modifier = Modifier.width(180.dp),
                 onClick = { onHeaderClick(FestivalGamesSortColumn.JEU) }
             )
             FestivalGamesHeaderCell(
                 text = sortLabel("Auteur", FestivalGamesSortColumn.AUTEUR, currentSort, ascending),
-                modifier = Modifier.width(140.dp),
+                modifier = Modifier.width(160.dp),
                 onClick = { onHeaderClick(FestivalGamesSortColumn.AUTEUR) }
             )
             FestivalGamesHeaderCell(
-                text = sortLabel("Editeur", FestivalGamesSortColumn.EDITEUR, currentSort, ascending),
-                modifier = Modifier.width(160.dp),
+                text = sortLabel("Éditeur", FestivalGamesSortColumn.EDITEUR, currentSort, ascending),
+                modifier = Modifier.width(180.dp),
                 onClick = { onHeaderClick(FestivalGamesSortColumn.EDITEUR) }
-            )
-            FestivalGamesHeaderCell(
-                text = sortLabel("Reservant", FestivalGamesSortColumn.RESERVANT, currentSort, ascending),
-                modifier = Modifier.width(160.dp),
-                onClick = { onHeaderClick(FestivalGamesSortColumn.RESERVANT) }
             )
         }
     }
@@ -254,22 +246,17 @@ private fun FestivalGameRow(
     ) {
         Text(
             text = item.game.name,
-            modifier = Modifier.width(160.dp),
+            modifier = Modifier.width(180.dp),
             color = MaterialTheme.colorScheme.onBackground
         )
         Text(
             text = item.game.author,
-            modifier = Modifier.width(140.dp),
-            color = MaterialTheme.colorScheme.onBackground
-        )
-        Text(
-            text = item.editorName ?: "Acteur #${item.game.editorId}",
             modifier = Modifier.width(160.dp),
             color = MaterialTheme.colorScheme.onBackground
         )
         Text(
-            text = item.reservantName ?: "—",
-            modifier = Modifier.width(160.dp),
+            text = item.editorName ?: "—",
+            modifier = Modifier.width(180.dp),
             color = MaterialTheme.colorScheme.onBackground
         )
     }
