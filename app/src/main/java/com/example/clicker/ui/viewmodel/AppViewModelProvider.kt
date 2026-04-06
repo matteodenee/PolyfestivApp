@@ -13,6 +13,7 @@ import com.example.clicker.ui.screens.games.GamesViewModel
 import com.example.clicker.ui.screens.login.LoginViewModel
 import com.example.clicker.ui.screens.register.RegisterViewModel
 import com.example.clicker.ui.screens.admin.AdminViewModel
+import com.example.clicker.ui.screens.publicPlan.PublicPlanViewModel
 
 object AppViewModelProvider {
     val Factory = viewModelFactory {
@@ -62,13 +63,27 @@ object AppViewModelProvider {
                 clickerApplication().container.adminRepository
             )
         }
-        
+
         initializer {
             ExposantViewModel(
                 repository = clickerApplication().container.exposantRepository
             )
         }
-          
+
+
+        initializer {
+            PublicPlanViewModel(
+                clickerApplication().container.festivalsRepository,
+                clickerApplication().container.mapZoneRepository,
+                clickerApplication().container.reservationsRepository,
+                clickerApplication().container.reservationGameRepository,
+                clickerApplication().container.reservationGamePlacementRepository,
+                clickerApplication().container.tarifZoneRepository,
+                clickerApplication().container.gamesRepository,
+                clickerApplication().container.exposantRepository
+            )
+        }
+
     }
 }
 
