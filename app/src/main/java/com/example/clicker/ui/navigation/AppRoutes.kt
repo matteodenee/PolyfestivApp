@@ -7,6 +7,7 @@ sealed interface AppRoutes {
     data class GameDetailRoute(val gameId: Int) : AppRoutes
     data class GameEditRoute(val gameId: Int) : AppRoutes
     data object FestivalListRoute : AppRoutes
+    data object FestivalCreateRoute : AppRoutes
     data class FestivalDetailRoute(val festivalId: Int) : AppRoutes
     data class FestivalModifRoute(val festivalId: Int) : AppRoutes
     data class ModifDetailRoute(val festivalId: Int) : AppRoutes

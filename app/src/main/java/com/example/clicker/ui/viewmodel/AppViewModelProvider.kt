@@ -13,6 +13,7 @@ import com.example.clicker.ui.screens.games.GamesViewModel
 import com.example.clicker.ui.screens.login.LoginViewModel
 import com.example.clicker.ui.screens.register.RegisterViewModel
 import com.example.clicker.ui.screens.festivalList.FestivalListViewModel
+import com.example.clicker.ui.screens.festivalList.FestivalCreateViewModel
 import com.example.clicker.ui.screens.festivalDetail.FestivalDetailViewModel
 import com.example.clicker.ui.screens.festivalEdit.ModifDetailViewModel
 import com.example.clicker.ui.screens.festivalEdit.StockTablesViewModel
@@ -59,6 +60,12 @@ object AppViewModelProvider {
 
         initializer {
             FestivalListViewModel(
+                clickerApplication().container.festivalsRepository
+            )
+        }
+
+        initializer {
+            FestivalCreateViewModel(
                 clickerApplication().container.festivalsRepository
             )
         }

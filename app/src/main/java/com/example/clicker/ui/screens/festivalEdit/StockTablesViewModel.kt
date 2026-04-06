@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.clicker.TAG
 import com.example.clicker.data.table.TableDto
+import com.example.clicker.data.table.TableRequest
 import com.example.clicker.data.table.TablesRepository
 import kotlinx.coroutines.launch
 
@@ -49,6 +50,17 @@ class StockTablesViewModel(private val repository: TablesRepository) : ViewModel
                 fetchTables() // Reload lists to refresh UI immediately
             } catch (e: Exception) {
                 Log.e(TAG, "Error updating table", e)
+            }
+        }
+    }
+
+    fun addTable(request: TableRequest) {
+        viewModelScope.launch {
+            try {
+                repository.createTable(request)
+                fetchTables() // Reload lists to refresh UI immediately
+            } catch (e: Exception) {
+                Log.e(TAG, "Error adding table", e)
             }
         }
     }

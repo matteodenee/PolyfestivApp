@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.clicker.TAG
 import com.example.clicker.data.equipment.EquipmentDto
+import com.example.clicker.data.equipment.EquipmentRequest
 import com.example.clicker.data.equipment.EquipmentsRepository
 import kotlinx.coroutines.launch
 
@@ -49,6 +50,17 @@ class StockMaterielViewModel(private val repository: EquipmentsRepository) : Vie
                 fetchEquipments()
             } catch (e: Exception) {
                 Log.e(TAG, "Error updating equipment", e)
+            }
+        }
+    }
+
+    fun addEquipment(request: EquipmentRequest) {
+        viewModelScope.launch {
+            try {
+                repository.createEquipment(request)
+                fetchEquipments()
+            } catch (e: Exception) {
+                Log.e(TAG, "Error adding equipment", e)
             }
         }
     }

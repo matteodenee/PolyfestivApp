@@ -39,6 +39,7 @@ import com.example.clicker.ui.screens.register.RegisterScreen
 import com.example.clicker.ui.screens.festivalList.FestivalScreen
 import com.example.clicker.ui.screens.festivalDetail.FestivalDetailScreen
 import com.example.clicker.ui.screens.festivalDetail.FestivalModifScreen
+import com.example.clicker.ui.screens.festivalList.FestivalCreateScreen
 import com.example.clicker.ui.theme.PrimaryYellow
 import com.example.clicker.ui.viewmodel.AppViewModelProvider
 
@@ -82,6 +83,7 @@ fun ClickerNavHost(
                                 AppRoutes.GameCreateRoute -> "Ajout"
                                 is AppRoutes.GameDetailRoute -> "Détail"
                                 is AppRoutes.GameEditRoute -> "Modification"
+                                AppRoutes.FestivalCreateRoute -> "Nouveau Festival"
                                 is AppRoutes.FestivalDetailRoute -> "Détail Festival"
                                 is AppRoutes.FestivalModifRoute -> "Modification"
                                 is AppRoutes.ModifDetailRoute -> "Détail festival"
@@ -190,6 +192,9 @@ fun ClickerNavHost(
                                 refreshKey = festivalsRefreshKey,
                                 onFestivalClick = { festivalId ->
                                     backStack.add(AppRoutes.FestivalDetailRoute(festivalId))
+                                },
+                                onAddClick = {
+                                    backStack.add(AppRoutes.FestivalCreateRoute)
                                 }
                             )
                         }
@@ -250,6 +255,18 @@ fun ClickerNavHost(
                                     gamesRefreshKey++
                                     detailRefreshKey++
                                     backStack.removeLastOrNull()
+                                }
+                            )
+                        }
+                    }
+
+                    AppRoutes.FestivalCreateRoute -> NavEntry(key) {
+                        Box(modifier = Modifier.padding(innerPadding)) {
+                            FestivalCreateScreen(
+                                onCreateSuccess = { festivalId ->
+                                    festivalsRefreshKey++
+                                    backStack.removeLastOrNull() // Pop create screen
+                                    backStack.add(AppRoutes.FestivalDetailRoute(festivalId)) // Go to detail
                                 }
                             )
                         }
@@ -376,6 +393,7 @@ private fun isDestinationSelected(currentDestination: Any?, destination: Destina
                 currentDestination is AppRoutes.GameEditRoute
 
         Destination.FESTIVALS -> currentDestination == Destination.FESTIVALS ||
+                currentDestination == AppRoutes.FestivalCreateRoute ||
                 currentDestination is AppRoutes.FestivalDetailRoute ||
                 currentDestination is AppRoutes.FestivalModifRoute ||
                 currentDestination is AppRoutes.ModifDetailRoute ||
