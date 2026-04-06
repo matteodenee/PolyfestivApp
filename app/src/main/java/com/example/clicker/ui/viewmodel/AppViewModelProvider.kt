@@ -14,6 +14,11 @@ import com.example.clicker.ui.screens.login.LoginViewModel
 import com.example.clicker.ui.screens.register.RegisterViewModel
 import com.example.clicker.ui.screens.festivalList.FestivalListViewModel
 import com.example.clicker.ui.screens.festivalDetail.FestivalDetailViewModel
+import com.example.clicker.ui.screens.festivalEdit.ModifDetailViewModel
+import com.example.clicker.ui.screens.festivalEdit.StockTablesViewModel
+import com.example.clicker.ui.screens.festivalEdit.StockMaterielViewModel
+import com.example.clicker.ui.screens.festivalEdit.ZonesTarifViewModel
+import com.example.clicker.ui.screens.festivalEdit.ZonesPlanViewModel
 
 object AppViewModelProvider {
     val Factory = viewModelFactory {
@@ -61,6 +66,36 @@ object AppViewModelProvider {
         initializer {
             FestivalDetailViewModel(
                 clickerApplication().container.festivalsRepository
+            )
+        }
+
+        initializer {
+            ModifDetailViewModel(
+                clickerApplication().container.festivalsRepository
+            )
+        }
+
+        initializer {
+            StockTablesViewModel(
+                clickerApplication().container.tablesRepository
+            )
+        }
+
+        initializer {
+            StockMaterielViewModel(
+                clickerApplication().container.equipmentsRepository
+            )
+        }
+
+        initializer {
+            ZonesTarifViewModel(
+                clickerApplication().container.tariffZonesRepository
+            )
+        }
+
+        initializer {
+            ZonesPlanViewModel(
+                clickerApplication().container.mapZonesRepository
             )
         }
     }
