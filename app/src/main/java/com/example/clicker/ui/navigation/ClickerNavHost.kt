@@ -38,6 +38,7 @@ import com.example.clicker.ui.screens.login.LoginViewModel
 import com.example.clicker.ui.screens.register.RegisterScreen
 import com.example.clicker.ui.screens.festivalList.FestivalScreen
 import com.example.clicker.ui.screens.festivalDetail.FestivalDetailScreen
+import com.example.clicker.ui.screens.festivalDetail.FestivalModifScreen
 import com.example.clicker.ui.theme.PrimaryYellow
 import com.example.clicker.ui.viewmodel.AppViewModelProvider
 
@@ -82,6 +83,13 @@ fun ClickerNavHost(
                                 is AppRoutes.GameDetailRoute -> "Détail"
                                 is AppRoutes.GameEditRoute -> "Modification"
                                 is AppRoutes.FestivalDetailRoute -> "Détail Festival"
+                                is AppRoutes.FestivalModifRoute -> "Modification"
+                                is AppRoutes.ModifDetailRoute -> "Détail festival"
+                                is AppRoutes.StockTablesRoute -> "Stock tables"
+                                is AppRoutes.StockMaterielRoute -> "Stock matériel"
+                                is AppRoutes.ZonesTarifRoute -> "Zones tarifaires"
+                                is AppRoutes.ZonesPlanRoute -> "Zones du plan"
+                                is AppRoutes.GenericEditRoute -> currentDestination.screenTitle.replace("Plan ", "")
                                 else -> "Clicker"
                             }
                         )
@@ -252,11 +260,97 @@ fun ClickerNavHost(
                             FestivalDetailScreen(
                                 festivalId = key.festivalId,
                                 refreshKey = detailRefreshKey,
-                                onEditClick = {
-
+                                onEditClick = { festivalId ->
+                                    backStack.add(AppRoutes.FestivalModifRoute(festivalId))
                                 },
                                 onDeleteSuccess = {
                                     festivalsRefreshKey++
+                                    backStack.removeLastOrNull()
+                                }
+                            )
+                        }
+                    }
+
+                    is AppRoutes.FestivalModifRoute -> NavEntry(key) {
+                        Box(modifier = Modifier.padding(innerPadding)) {
+                            FestivalModifScreen(
+                                festivalId = key.festivalId,
+                                onBackClick = {
+                                    backStack.removeLastOrNull()
+                                },
+                                onStepClick = { step ->
+                                    when (step) {
+                                        1 -> backStack.add(AppRoutes.ModifDetailRoute(key.festivalId))
+                                        2 -> backStack.add(AppRoutes.StockTablesRoute(key.festivalId))
+                                        3 -> backStack.add(AppRoutes.StockMaterielRoute(key.festivalId))
+                                        4 -> backStack.add(AppRoutes.ZonesTarifRoute(key.festivalId))
+                                        5 -> backStack.add(AppRoutes.ZonesPlanRoute(key.festivalId))
+                                    }
+                                }
+                            )
+                        }
+                    }
+
+                    is AppRoutes.ModifDetailRoute -> NavEntry(key) {
+                        Box(modifier = Modifier.padding(innerPadding)) {
+                            com.example.clicker.ui.screens.festivalEdit.ModifDetailScreen(
+                                festivalId = key.festivalId,
+                                onBackClick = {
+                                    backStack.removeLastOrNull()
+                                }
+                            )
+                        }
+                    }
+
+                    is AppRoutes.StockTablesRoute -> NavEntry(key) {
+                        Box(modifier = Modifier.padding(innerPadding)) {
+                            com.example.clicker.ui.screens.festivalEdit.StockTablesScreen(
+                                festivalId = key.festivalId,
+                                onNavigateToEdit = { name ->
+                                    backStack.add(AppRoutes.GenericEditRoute(name))
+                                }
+                            )
+                        }
+                    }
+
+                    is AppRoutes.StockMaterielRoute -> NavEntry(key) {
+                        Box(modifier = Modifier.padding(innerPadding)) {
+                            com.example.clicker.ui.screens.festivalEdit.StockMaterielScreen(
+                                festivalId = key.festivalId,
+                                onNavigateToEdit = { name ->
+                                    backStack.add(AppRoutes.GenericEditRoute(name))
+                                }
+                            )
+                        }
+                    }
+
+                    is AppRoutes.ZonesTarifRoute -> NavEntry(key) {
+                        Box(modifier = Modifier.padding(innerPadding)) {
+                            com.example.clicker.ui.screens.festivalEdit.ZonesTarifScreen(
+                                festivalId = key.festivalId,
+                                onNavigateToEdit = { name ->
+                                    backStack.add(AppRoutes.GenericEditRoute(name))
+                                }
+                            )
+                        }
+                    }
+
+                    is AppRoutes.ZonesPlanRoute -> NavEntry(key) {
+                        Box(modifier = Modifier.padding(innerPadding)) {
+                            com.example.clicker.ui.screens.festivalEdit.ZonesPlanScreen(
+                                festivalId = key.festivalId,
+                                onNavigateToEdit = { name ->
+                                    backStack.add(AppRoutes.GenericEditRoute(name))
+                                }
+                            )
+                        }
+                    }
+
+                    is AppRoutes.GenericEditRoute -> NavEntry(key) {
+                        Box(modifier = Modifier.padding(innerPadding)) {
+                            com.example.clicker.ui.screens.festivalEdit.GenericEditScreen(
+                                screenTitle = key.screenTitle,
+                                onBackClick = {
                                     backStack.removeLastOrNull()
                                 }
                             )
@@ -274,7 +368,7 @@ fun ClickerNavHost(
     }
 }
 
-private fun isDestinationSelected(currentDestination: Any?, destination: Destination): Boolean { // dit à la bottom bar quel onglet doit être considéré comme actif
+private fun isDestinationSelected(currentDestination: Any?, destination: Destination): Boolean {
     return when (destination) {
         Destination.JEUX -> currentDestination == Destination.JEUX ||
                 currentDestination == AppRoutes.GameCreateRoute ||
@@ -282,7 +376,14 @@ private fun isDestinationSelected(currentDestination: Any?, destination: Destina
                 currentDestination is AppRoutes.GameEditRoute
 
         Destination.FESTIVALS -> currentDestination == Destination.FESTIVALS ||
-                currentDestination is AppRoutes.FestivalDetailRoute
+                currentDestination is AppRoutes.FestivalDetailRoute ||
+                currentDestination is AppRoutes.FestivalModifRoute ||
+                currentDestination is AppRoutes.ModifDetailRoute ||
+                currentDestination is AppRoutes.StockTablesRoute ||
+                currentDestination is AppRoutes.StockMaterielRoute ||
+                currentDestination is AppRoutes.ZonesTarifRoute ||
+                currentDestination is AppRoutes.ZonesPlanRoute ||
+                currentDestination is AppRoutes.GenericEditRoute
 
         else -> currentDestination == destination
     }

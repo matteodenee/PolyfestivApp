@@ -7,8 +7,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -18,9 +16,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -31,7 +26,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -44,7 +38,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.clicker.ui.theme.ButtonBlue
-import com.example.clicker.ui.theme.ButtonOrange
 import com.example.clicker.ui.viewmodel.AppViewModelProvider
 
 import java.time.ZonedDateTime
@@ -69,7 +62,7 @@ fun FestivalMenuItem(
 ) {
     Column(
         modifier = Modifier
-            .fillMaxWidth() // ← remove the fixed width(110.dp), let the grid control it
+            .fillMaxWidth()
             .clickable { onClick() },
         horizontalAlignment = Alignment.Start
     ) {
@@ -84,14 +77,14 @@ fun FestivalMenuItem(
             Icon(
                 imageVector = Icons.Default.Category,
                 contentDescription = null,
-                modifier = Modifier.size(40.dp), // ← slightly smaller icon for 3-col layout
+                modifier = Modifier.size(40.dp),
                 tint = Color.LightGray
             )
         }
         Spacer(modifier = Modifier.height(8.dp))
         Text(
             text = label,
-            fontSize = 12.sp, // ← slightly smaller font for 3-col layout
+            fontSize = 12.sp,
             lineHeight = 16.sp,
             fontWeight = FontWeight.Medium,
             color = Color.Black
@@ -117,7 +110,6 @@ fun FestivalMenuGrid(
                         FestivalMenuItem(label = label, onClick = onClick)
                     }
                 }
-                // Fill empty slots if the last row has fewer than 3 items
                 repeat(3 - rowItems.size) {
                     Spacer(modifier = Modifier.weight(1f))
                 }
@@ -185,13 +177,40 @@ fun FestivalDetailScreen(
                 Spacer(modifier = Modifier.height(12.dp))
 
                 Text("Du ${formatFestivalDate(festival.startDate)} au ${formatFestivalDate(festival.endDate)}")
-                Text("Date de fin : ${festival.endDate}")
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                Text("Description", style = MaterialTheme.typography.titleMedium)
-                Spacer(modifier = Modifier.height(6.dp))
-                Text(festival.description.ifBlank { "-" })
+                Button(
+                    onClick = { onEditClick(festival.id) },
+                    colors = ButtonDefaults.buttonColors(containerColor = ButtonBlue),
+                    shape = RoundedCornerShape(20.dp)
+                ) {
+                    Text("Modifier", color = Color.White)
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Text("Détail", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                Spacer(modifier = Modifier.height(8.dp))
+                
+                Text("Dates : ${formatFestivalDate(festival.startDate)} - ${formatFestivalDate(festival.endDate)}")
+                Spacer(modifier = Modifier.height(8.dp))
+                Text("Capacité totale : ")
+                Text("Capacité espace (m² - tables) : ")
+                Text("Espace restant (estimation) : ")
+                Spacer(modifier = Modifier.height(8.dp))
+                Text("Tables disponibles (zones) :")
+                Spacer(modifier = Modifier.height(8.dp))
+                Text("Zones tarifaires :")
+                Text("Tables prévues : ")
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                Text(
+                    "Gérer le festival",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold
+                )
 
                 Spacer(modifier = Modifier.height(24.dp))
 
