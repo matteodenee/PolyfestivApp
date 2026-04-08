@@ -15,11 +15,11 @@ import com.example.clicker.data.reservationGame.ReservationGameRepository
 import com.example.clicker.data.reservationGame.ReservationGameRequest
 import com.example.clicker.data.reservationTariffzoneAllocation.ReservationTariffzoneAllocationRepository
 import com.example.clicker.data.reservationTariffzoneAllocation.ReservationTariffzoneAllocationRequest
-import com.example.clicker.data.tarifZone.TarifZoneRepository
+import com.example.clicker.data.zone.TariffZonesRepository
 import kotlinx.coroutines.launch
 
 class ReservationSuppliesViewModel(
-    private val tarifZoneRepository: TarifZoneRepository,
+    private val tarifZoneRepository: TariffZonesRepository,
     private val allocationRepository: ReservationTariffzoneAllocationRepository,
     private val reservationGameRepository: ReservationGameRepository,
     private val gamesRepository: GamesRepository,
@@ -61,7 +61,7 @@ class ReservationSuppliesViewModel(
                         ?: reservation // Si on ne la trouve pas (null), on garde l'ancienne réservation pour éviter un crash
 
                 val tariffZones =
-                    tarifZoneRepository.getTarifZonesByFestival(refreshedReservation.festivalId)
+                    tarifZoneRepository.getTariffZonesByFestival(refreshedReservation.festivalId)
 
                 val allocations =
                     allocationRepository.getAllocationsByReservation(refreshedReservation.id)

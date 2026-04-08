@@ -18,11 +18,9 @@ import com.example.clicker.data.admin.AdminApiService
 import com.example.clicker.data.reservation.ReservationsApiService
 import com.example.clicker.data.reservationGame.ReservationGameApiService
 import com.example.clicker.data.reservationTariffzoneAllocation.ReservationTariffzoneAllocationApiService
-import com.example.clicker.data.tarifZone.TarifZoneApiService
 import com.example.clicker.data.reservationNote.ReservationNoteApiService
 import com.example.clicker.data.reservationContact.ReservationContactApiService
 import com.example.clicker.data.invoice.InvoiceApiService
-import com.example.clicker.data.equipment.EquipmentApiService
 
 
 object RetrofitInstance {

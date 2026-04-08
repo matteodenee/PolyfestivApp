@@ -4,22 +4,22 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.clicker.data.equipment.EquipmentRepository
+import com.example.clicker.data.equipment.EquipmentsRepository
 import com.example.clicker.data.invoice.InvoiceDto
 import com.example.clicker.data.invoice.InvoiceRepository
 import com.example.clicker.data.invoice.InvoiceRequest
 import com.example.clicker.data.reservation.ReservationDto
 import com.example.clicker.data.reservationGame.ReservationGameRepository
 import com.example.clicker.data.reservationTariffzoneAllocation.ReservationTariffzoneAllocationRepository
-import com.example.clicker.data.tarifZone.TarifZoneRepository
+import com.example.clicker.data.zone.TariffZonesRepository
 import kotlinx.coroutines.launch
 
 class ReservationInvoiceViewModel(
     private val invoiceRepository: InvoiceRepository,
-    private val tarifZoneRepository: TarifZoneRepository,
+    private val tarifZoneRepository: TariffZonesRepository,
     private val allocationRepository: ReservationTariffzoneAllocationRepository,
     private val reservationGameRepository: ReservationGameRepository,
-    private val equipmentRepository: EquipmentRepository
+    private val equipmentRepository: EquipmentsRepository
 ) : ViewModel() {
 
     private val internalState = mutableStateOf<ReservationInvoiceUiState>(ReservationInvoiceUiState.Loading)
@@ -30,7 +30,7 @@ class ReservationInvoiceViewModel(
             internalState.value = ReservationInvoiceUiState.Loading
             try {
                 val invoices = invoiceRepository.getInvoicesByReservation(reservation.id)
-                val tariffZones = tarifZoneRepository.getTarifZonesByFestival(reservation.festivalId)
+                val tariffZones = tarifZoneRepository.getTariffZonesByFestival(reservation.festivalId)
                 val allocations = allocationRepository.getAllocationsByReservation(reservation.id)
                 val reservationGames = reservationGameRepository.getGamesByReservation(reservation.id)
                 val equipments = equipmentRepository.getEquipmentsByFestival(reservation.festivalId)

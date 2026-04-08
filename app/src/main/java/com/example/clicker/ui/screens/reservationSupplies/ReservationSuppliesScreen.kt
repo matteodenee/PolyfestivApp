@@ -45,7 +45,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.clicker.data.reservation.ReservationDto
 import com.example.clicker.data.reservationGame.ReservationGameDto
 import com.example.clicker.data.reservationTariffzoneAllocation.ReservationTariffzoneAllocationDto
-import com.example.clicker.data.tarifZone.TarifZoneDto
+import com.example.clicker.data.zone.TariffZoneDto
 import com.example.clicker.ui.theme.ButtonBlue
 import com.example.clicker.ui.viewmodel.AppViewModelProvider
 
@@ -291,7 +291,7 @@ fun ReservationSuppliesScreen(
 
 @Composable
 private fun TariffZoneField(
-    options: List<TarifZoneDto>,
+    options: List<TariffZoneDto>,
     selectedTariffZoneId: Int?,
     onSelected: (Int) -> Unit
 ) {

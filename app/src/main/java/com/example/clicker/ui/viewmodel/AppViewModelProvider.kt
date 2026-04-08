@@ -143,8 +143,7 @@ object AppViewModelProvider {
         initializer {
             ReservationDetailViewModel(
                 clickerApplication().container.reservationsRepository,
-                clickerApplication().container.exposantRepository,
-                clickerApplication().container.festivalsRepository
+                clickerApplication().container.exposantRepository
             )
         }
 
@@ -158,7 +157,7 @@ object AppViewModelProvider {
 
         initializer {
             ReservationSuppliesViewModel(
-                clickerApplication().container.tarifZoneRepository,
+                clickerApplication().container.tariffZonesRepository,
                 clickerApplication().container.reservationTariffzoneAllocationRepository,
                 clickerApplication().container.reservationGameRepository,
                 clickerApplication().container.gamesRepository,
@@ -182,10 +181,10 @@ object AppViewModelProvider {
         initializer {
             ReservationInvoiceViewModel(
                 clickerApplication().container.invoiceRepository,
-                clickerApplication().container.tarifZoneRepository,
+                clickerApplication().container.tariffZonesRepository,
                 clickerApplication().container.reservationTariffzoneAllocationRepository,
                 clickerApplication().container.reservationGameRepository,
-                clickerApplication().container.equipmentRepository
+                clickerApplication().container.equipmentsRepository
             )
         }
     }

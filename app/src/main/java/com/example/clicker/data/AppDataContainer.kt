@@ -15,11 +15,9 @@ import com.example.clicker.data.admin.AdminRepository
 import com.example.clicker.data.reservation.ReservationsRepository
 import com.example.clicker.data.reservationGame.ReservationGameRepository
 import com.example.clicker.data.reservationTariffzoneAllocation.ReservationTariffzoneAllocationRepository
-import com.example.clicker.data.tarifZone.TarifZoneRepository
 import com.example.clicker.data.reservationNote.ReservationNoteRepository
 import com.example.clicker.data.reservationContact.ReservationContactRepository
 import com.example.clicker.data.invoice.InvoiceRepository
-import com.example.clicker.data.equipment.EquipmentRepository
 
 class AppDataContainer(
     private val context: Context
@@ -61,7 +59,7 @@ class AppDataContainer(
             RetrofitInstance.reservationNoteApi
         )
     }
-    
+
     override val reservationContactRepository: ReservationContactRepository by lazy {
         ReservationContactRepository(RetrofitInstance.reservationContactApi)
     }

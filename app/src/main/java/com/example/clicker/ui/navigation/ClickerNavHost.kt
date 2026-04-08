@@ -413,14 +413,14 @@ fun ClickerNavHost(
                                 onSuppliesClick = { _, _ ->
                                     backStack.add(AppRoutes.ReservationSuppliesRoute(key.reservation))
                                 },
-                                onInvoiceClick = { reservation ->
-                                    backStack.add(AppRoutes.ReservationInvoiceRoute(reservation))
+                                onInvoiceClick = {
+                                    backStack.add(AppRoutes.ReservationInvoiceRoute(key.reservation))
                                 },
-                                onContactClick = { reservation ->
-                                    backStack.add(AppRoutes.ReservationContactRoute(reservation))
+                                onContactClick = {
+                                    backStack.add(AppRoutes.ReservationContactRoute(key.reservation))
                                 },
-                                onNoteClick = { reservation ->
-                                    backStack.add(AppRoutes.ReservationNoteRoute(reservation))
+                                onNoteClick = {
+                                    backStack.add(AppRoutes.ReservationNoteRoute(key.reservation))
                                 }
                             )
                         }
