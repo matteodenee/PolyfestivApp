@@ -3,6 +3,11 @@ package com.example.clicker.data.network
 import com.example.clicker.data.auth.AuthApiService
 import com.example.clicker.data.exposants.ExposantApiService
 import com.example.clicker.data.game.GamesApiService
+import com.example.clicker.data.festival.FestivalsApiService
+import com.example.clicker.data.table.TablesApiService
+import com.example.clicker.data.equipment.EquipmentsApiService
+import com.example.clicker.data.zone.TariffZonesApiService
+import com.example.clicker.data.zone.MapZonesApiService
 import kotlinx.serialization.json.Json
 import okhttp3.Interceptor
 import okhttp3.MediaType.Companion.toMediaType
@@ -61,6 +66,25 @@ object RetrofitInstance {
         retrofit.create(GamesApiService::class.java)
     }
 
+    val festivalsApi: FestivalsApiService by lazy {
+        retrofit.create(FestivalsApiService::class.java)
+    }
+
+    val tablesApi: TablesApiService by lazy {
+        retrofit.create(TablesApiService::class.java)
+    }
+
+    val equipmentsApi: EquipmentsApiService by lazy {
+        retrofit.create(EquipmentsApiService::class.java)
+    }
+
+    val tariffZonesApi: TariffZonesApiService by lazy {
+        retrofit.create(TariffZonesApiService::class.java)
+    }
+
+    val mapZonesApi: MapZonesApiService by lazy {
+        retrofit.create(MapZonesApiService::class.java)
+    }
     val adminApi: AdminApiService by lazy {
         retrofit.create(AdminApiService::class.java)
     }

@@ -12,6 +12,14 @@ import com.example.clicker.ui.screens.gameEdit.GameEditViewModel
 import com.example.clicker.ui.screens.games.GamesViewModel
 import com.example.clicker.ui.screens.login.LoginViewModel
 import com.example.clicker.ui.screens.register.RegisterViewModel
+import com.example.clicker.ui.screens.festivalList.FestivalListViewModel
+import com.example.clicker.ui.screens.festivalList.FestivalCreateViewModel
+import com.example.clicker.ui.screens.festivalDetail.FestivalDetailViewModel
+import com.example.clicker.ui.screens.festivalEdit.ModifDetailViewModel
+import com.example.clicker.ui.screens.festivalEdit.StockTablesViewModel
+import com.example.clicker.ui.screens.festivalEdit.StockMaterielViewModel
+import com.example.clicker.ui.screens.festivalEdit.ZonesTarifViewModel
+import com.example.clicker.ui.screens.festivalEdit.ZonesPlanViewModel
 import com.example.clicker.ui.screens.admin.AdminViewModel
 
 object AppViewModelProvider {
@@ -68,7 +76,54 @@ object AppViewModelProvider {
                 repository = clickerApplication().container.exposantRepository
             )
         }
-          
+
+        initializer {
+            FestivalListViewModel(
+                clickerApplication().container.festivalsRepository
+            )
+        }
+
+        initializer {
+            FestivalCreateViewModel(
+                clickerApplication().container.festivalsRepository
+            )
+        }
+
+        initializer {
+            FestivalDetailViewModel(
+                clickerApplication().container.festivalsRepository
+            )
+        }
+
+        initializer {
+            ModifDetailViewModel(
+                clickerApplication().container.festivalsRepository
+            )
+        }
+
+        initializer {
+            StockTablesViewModel(
+                clickerApplication().container.tablesRepository
+            )
+        }
+
+        initializer {
+            StockMaterielViewModel(
+                clickerApplication().container.equipmentsRepository
+            )
+        }
+
+        initializer {
+            ZonesTarifViewModel(
+                clickerApplication().container.tariffZonesRepository
+            )
+        }
+
+        initializer {
+            ZonesPlanViewModel(
+                clickerApplication().container.mapZonesRepository
+            )
+        }
     }
 }
 

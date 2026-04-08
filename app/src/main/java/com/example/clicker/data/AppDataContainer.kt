@@ -4,6 +4,11 @@ import android.content.Context
 import com.example.clicker.data.auth.AuthRepository
 import com.example.clicker.data.exposants.ExposantRepository
 import com.example.clicker.data.game.GamesRepository
+import com.example.clicker.data.festival.FestivalsRepository
+import com.example.clicker.data.table.TablesRepository
+import com.example.clicker.data.equipment.EquipmentsRepository
+import com.example.clicker.data.zone.TariffZonesRepository
+import com.example.clicker.data.zone.MapZonesRepository
 import com.example.clicker.data.local.game.GameDatabase
 import com.example.clicker.data.network.RetrofitInstance
 import com.example.clicker.data.admin.AdminRepository
@@ -29,5 +34,25 @@ class AppDataContainer(
 
     override val adminRepository: AdminRepository by lazy {
         AdminRepository(RetrofitInstance.adminApi)
+    }
+
+    override val festivalsRepository: FestivalsRepository by lazy {
+        FestivalsRepository(RetrofitInstance.festivalsApi)
+    }
+
+    override val tablesRepository: TablesRepository by lazy {
+        TablesRepository(RetrofitInstance.tablesApi)
+    }
+
+    override val equipmentsRepository: EquipmentsRepository by lazy {
+        EquipmentsRepository(RetrofitInstance.equipmentsApi)
+    }
+
+    override val tariffZonesRepository: TariffZonesRepository by lazy {
+        TariffZonesRepository(RetrofitInstance.tariffZonesApi)
+    }
+
+    override val mapZonesRepository: MapZonesRepository by lazy {
+        MapZonesRepository(RetrofitInstance.mapZonesApi)
     }
 }
