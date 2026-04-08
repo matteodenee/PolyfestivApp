@@ -11,10 +11,13 @@ import com.example.clicker.data.datastore.SessionPreferencesRepository
 import com.example.clicker.data.network.SessionCookieHolder
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import android.content.Context
+import com.example.clicker.ui.utils.network.NetworkUtils
 
 class LoginViewModel(
     private val authRepository: AuthRepository,
-    private val sessionPreferencesRepository: SessionPreferencesRepository
+    private val sessionPreferencesRepository: SessionPreferencesRepository,
+    private val context: Context // pour savoir si internet est disponible
 ) : ViewModel() {
 
     private val loginTextState = mutableStateOf("")
@@ -25,6 +28,14 @@ class LoginViewModel(
 
     private val internalState = mutableStateOf<LoginUiState>(LoginUiState.Idle)
     val state: State<LoginUiState> = internalState
+
+
+    private val currentUserRoleState = mutableStateOf<String?>(null)
+    val currentUserRole: State<String?> = currentUserRoleState
+
+    fun isAdmin(): Boolean {
+        return currentUserRoleState.value.equals("admin", ignoreCase = true)
+    }
 
     fun onLoginChange(value: String) {
         loginTextState.value = value
@@ -59,7 +70,10 @@ class LoginViewModel(
                 SessionCookieHolder.accessCookie = accessCookie
                 SessionCookieHolder.refreshCookie = refreshCookie
 
-                sessionPreferencesRepository.saveSession(accessCookie, refreshCookie)
+                val userRole = result.response.user.role
+                currentUserRoleState.value = userRole
+
+                sessionPreferencesRepository.saveSession(accessCookie, refreshCookie, userRole)
 
                 Log.d(TAG, "Connexion réussie pour : ${result.response.user.login}")
                 internalState.value = LoginUiState.Success(result.response.user)
@@ -77,6 +91,7 @@ class LoginViewModel(
         viewModelScope.launch {
             val savedAccessCookie = sessionPreferencesRepository.accessCookie.first()
             val savedRefreshCookie = sessionPreferencesRepository.refreshCookie.first()
+            val savedUserRole = sessionPreferencesRepository.userRole.first()
 
             if (savedAccessCookie.isNullOrBlank() || savedRefreshCookie.isNullOrBlank()) {
                 Log.d(TAG, "Aucune session sauvegardée")
@@ -87,30 +102,42 @@ class LoginViewModel(
 
             SessionCookieHolder.accessCookie = savedAccessCookie
             SessionCookieHolder.refreshCookie = savedRefreshCookie
+            currentUserRoleState.value = savedUserRole
 
-            val sessionValid = authRepository.checkSession()
-
-            if (sessionValid) {
-                Log.d(TAG, "Session valide avec access token actuel")
+            // Si l’utilisateur a déjà une session sauvegardée et qu’il n’a pas Internet, on ne bloque pas l’accès, on le laisse entrer en offline
+            if (!NetworkUtils.isInternetAvailable(context)) {
+                Log.d(TAG, "Mode hors ligne : accès autorisé avec session locale")
                 onSessionFound()
-            } else {
-                Log.d(TAG, "Access token expiré, tentative de refresh")
+                return@launch
+            }
 
-                val newAccessCookie = authRepository.refreshSession()
+            try {
+                val sessionValid = authRepository.checkSession()
 
-                if (!newAccessCookie.isNullOrBlank()) {
-                    SessionCookieHolder.accessCookie = newAccessCookie
-                    sessionPreferencesRepository.updateAccessCookie(newAccessCookie)
-
-                    Log.d(TAG, "Session restaurée après refresh")
+                if (sessionValid) {
+                    Log.d(TAG, "Session valide avec access token actuel")
                     onSessionFound()
                 } else {
-                    Log.d(TAG, "Refresh expiré ou invalide, suppression de la session")
+                    Log.d(TAG, "Access token expiré, tentative de refresh")
 
-                    SessionCookieHolder.accessCookie = null
-                    SessionCookieHolder.refreshCookie = null
-                    sessionPreferencesRepository.clearSession()
+                    val newAccessCookie = authRepository.refreshSession()
+
+                    if (!newAccessCookie.isNullOrBlank()) {
+                        SessionCookieHolder.accessCookie = newAccessCookie
+                        sessionPreferencesRepository.updateAccessCookie(newAccessCookie)
+
+                        Log.d(TAG, "Session restaurée après refresh")
+                        onSessionFound()
+                    } else {
+                        Log.d(TAG, "Refresh expiré ou invalide, suppression de la session")
+
+                        SessionCookieHolder.accessCookie = null
+                        SessionCookieHolder.refreshCookie = null
+                        sessionPreferencesRepository.clearSession()
+                    }
                 }
+            } catch (e: Exception) {
+                Log.e(TAG, "Impossible de restaurer la session", e)
             }
         }
     }
@@ -119,6 +146,7 @@ class LoginViewModel(
         viewModelScope.launch {
             SessionCookieHolder.accessCookie = null
             SessionCookieHolder.refreshCookie = null
+            currentUserRoleState.value = null
             sessionPreferencesRepository.clearSession()
             internalState.value = LoginUiState.Idle
             onLoggedOut()

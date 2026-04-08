@@ -1,5 +1,6 @@
 package com.example.clicker.ui.screens.gameCreate
 
+import android.content.Context
 import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
@@ -12,10 +13,12 @@ import com.example.clicker.data.game.GamesRepository
 import com.example.clicker.ui.utils.gameUtils.GameFormState
 import com.example.clicker.ui.utils.gameUtils.GameFormValidator
 import com.example.clicker.ui.utils.gameUtils.toGameRequest
+import com.example.clicker.ui.utils.network.NetworkUtils
 import kotlinx.coroutines.launch
 
 class GameCreateViewModel(
-    private val gamesRepository: GamesRepository
+    private val gamesRepository: GamesRepository,
+    private val context: Context
 ) : ViewModel() {
 
     var formState by mutableStateOf(GameFormState())
@@ -32,6 +35,12 @@ class GameCreateViewModel(
         val validationError = GameFormValidator.validate(formState)
         if (validationError != null) {
             internalState.value = GameCreateUiState.Error(validationError)
+            return
+        }
+        // On bloque la création en mode hors ligne
+        if (!NetworkUtils.isInternetAvailable(context)) {
+            internalState.value =
+                GameCreateUiState.Error("Mode hors ligne : création impossible")
             return
         }
 

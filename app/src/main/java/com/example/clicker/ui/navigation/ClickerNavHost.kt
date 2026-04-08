@@ -6,8 +6,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -20,15 +22,24 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.ui.NavDisplay
+import com.example.clicker.ui.screens.admin.AdminScreen
+import com.example.clicker.ui.screens.exposants.DetailsExposantScreen
+import com.example.clicker.ui.screens.exposants.ExposantFormMode
+import com.example.clicker.ui.screens.exposants.ExposantFormScreen
+import com.example.clicker.ui.screens.exposants.ExposantViewModel
+import com.example.clicker.ui.screens.exposants.ExposantsScreen
 import com.example.clicker.ui.screens.gameCreate.GameCreateScreen
 import com.example.clicker.ui.screens.gameDetail.GameDetailScreen
 import com.example.clicker.ui.screens.gameEdit.GameEditScreen
@@ -41,18 +52,23 @@ import com.example.clicker.ui.screens.festivalDetail.FestivalDetailScreen
 import com.example.clicker.ui.screens.festivalDetail.FestivalModifScreen
 import com.example.clicker.ui.screens.festivalList.FestivalCreateScreen
 import com.example.clicker.ui.theme.PrimaryYellow
+import com.example.clicker.ui.utils.network.NetworkUtils
 import com.example.clicker.ui.viewmodel.AppViewModelProvider
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ClickerNavHost(
-    loginViewModel: LoginViewModel = viewModel(factory = AppViewModelProvider.Factory)
+    loginViewModel: LoginViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    exposantViewModel: ExposantViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
     val backStack = remember { mutableStateListOf<Any>(AppRoutes.LOGIN) }
+    val exposantUiState by exposantViewModel.uiState.collectAsState()
 
     var gamesRefreshKey by remember { mutableIntStateOf(0) }
     var festivalsRefreshKey by remember { mutableIntStateOf(0) }
     var detailRefreshKey by remember { mutableIntStateOf(0) }
+    var adminRefreshKey by remember { mutableIntStateOf(0) }
+    val context = LocalContext.current
 
     LaunchedEffect(Unit) {
         loginViewModel.restoreSessionIfNeeded {
@@ -63,6 +79,13 @@ fun ClickerNavHost(
 
     val currentDestination = backStack.lastOrNull()
     val shouldDisplayBars = currentDestination !in listOf(AppRoutes.LOGIN, AppRoutes.REGISTER)
+    val isAdmin = loginViewModel.isAdmin()
+
+    val bottomDestinations = if (isAdmin) {
+        Destination.entries.toList()
+    } else {
+        Destination.entries.filter { it != Destination.ADMIN }
+    }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -80,6 +103,7 @@ fun ClickerNavHost(
                                 Destination.FESTIVALS -> "Festivals"
                                 Destination.JEUX -> "Jeux"
                                 Destination.EXPOSANTS -> "Exposants"
+                                Destination.ADMIN -> "Admin"
                                 AppRoutes.GameCreateRoute -> "Ajout"
                                 is AppRoutes.GameDetailRoute -> "Détail"
                                 is AppRoutes.GameEditRoute -> "Modification"
@@ -92,6 +116,12 @@ fun ClickerNavHost(
                                 is AppRoutes.ZonesTarifRoute -> "Zones tarifaires"
                                 is AppRoutes.ZonesPlanRoute -> "Zones du plan"
                                 is AppRoutes.GenericEditRoute -> currentDestination.screenTitle.replace("Plan ", "")
+                                AppRoutes.GameCreateRoute,
+                                AppRoutes.ExposantCreateRoute -> "Ajout"
+                                is AppRoutes.GameDetailRoute,
+                                is AppRoutes.ExposantDetailRoute -> "Détail"
+                                is AppRoutes.GameEditRoute,
+                                is AppRoutes.ExposantEditRoute -> "Modification"
                                 else -> "Clicker"
                             }
                         )
@@ -109,6 +139,21 @@ fun ClickerNavHost(
                                 contentDescription = "Retour"
                             )
                         }
+                    },
+                    actions = {
+                        IconButton(
+                            onClick = {
+                                loginViewModel.logout {
+                                    backStack.clear()
+                                    backStack.add(AppRoutes.LOGIN)
+                                }
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Logout,
+                                contentDescription = "Déconnexion"
+                            )
+                        }
                     }
                 )
             }
@@ -121,7 +166,7 @@ fun ClickerNavHost(
                     NavigationBar(
                         containerColor = MaterialTheme.colorScheme.primary
                     ) {
-                        Destination.entries.forEach { destination ->
+                        bottomDestinations.forEach { destination ->
                             NavigationBarItem(
                                 selected = isDestinationSelected(currentDestination, destination),
                                 onClick = {
@@ -173,6 +218,7 @@ fun ClickerNavHost(
                         Box(modifier = Modifier.padding(innerPadding)) {
                             RegisterScreen(
                                 onRegisterSuccess = {
+                                    adminRefreshKey++
                                     if (backStack.size > 1) {
                                         backStack.removeLastOrNull()
                                     }
@@ -201,14 +247,19 @@ fun ClickerNavHost(
                     }
 
                     Destination.JEUX -> NavEntry(key) {
+                        val isOnline = NetworkUtils.isInternetAvailable(context)
+
                         Box(modifier = Modifier.padding(innerPadding)) {
                             GamesScreen(
                                 refreshKey = gamesRefreshKey,
+                                canAdd = isOnline,
                                 onGameClick = { gameId ->
                                     backStack.add(AppRoutes.GameDetailRoute(gameId))
                                 },
                                 onAddClick = {
-                                    backStack.add(AppRoutes.GameCreateRoute)
+                                    if (NetworkUtils.isInternetAvailable(context)) {
+                                        backStack.add(AppRoutes.GameCreateRoute)
+                                    }
                                 }
                             )
                         }
@@ -216,26 +267,58 @@ fun ClickerNavHost(
 
                     Destination.EXPOSANTS -> NavEntry(key) {
                         Box(modifier = Modifier.padding(innerPadding)) {
-                            Text("Exposants")
-                        }
-                    }
-
-                    AppRoutes.GameCreateRoute -> NavEntry(key) {
-                        Box(modifier = Modifier.padding(innerPadding)) {
-                            GameCreateScreen(
-                                onCreateSuccess = {
-                                    gamesRefreshKey++
-                                    backStack.removeLastOrNull()
+                            ExposantsScreen(
+                                exposantViewModel = exposantViewModel,
+                                onAddClick = {
+                                    backStack.add(AppRoutes.ExposantCreateRoute)
+                                },
+                                onDetailsClick = { exposantId ->
+                                    backStack.add(AppRoutes.ExposantDetailRoute(exposantId))
                                 }
                             )
                         }
                     }
 
+                    Destination.ADMIN -> NavEntry(key) {
+                        Box(modifier = Modifier.padding(innerPadding)) {
+                            AdminScreen(
+                                refreshKey = adminRefreshKey
+                            )
+                        }
+                    }
+
+                    AppRoutes.GameCreateRoute -> NavEntry(key) {
+                        val isOnline = NetworkUtils.isInternetAvailable(context)
+
+                        if (!isOnline) {
+                            LaunchedEffect(Unit) {
+                                backStack.removeLastOrNull()
+                            }
+
+                            Box(modifier = Modifier.padding(innerPadding)) {
+                                Text("Connexion internet requise")
+                            }
+                        } else {
+                            Box(modifier = Modifier.padding(innerPadding)) {
+                                GameCreateScreen(
+                                    onCreateSuccess = {
+                                        gamesRefreshKey++
+                                        backStack.removeLastOrNull()
+                                    }
+                                )
+                            }
+                        }
+                    }
+
                     is AppRoutes.GameDetailRoute -> NavEntry(key) {
+                        val isOnline = NetworkUtils.isInternetAvailable(context)
+
                         Box(modifier = Modifier.padding(innerPadding)) {
                             GameDetailScreen(
                                 gameId = key.gameId,
                                 refreshKey = detailRefreshKey,
+                                canDelete = isOnline,
+                                canEdit = isOnline,
                                 onEditClick = { gameId ->
                                     backStack.add(AppRoutes.GameEditRoute(gameId))
                                 },
@@ -248,12 +331,40 @@ fun ClickerNavHost(
                     }
 
                     is AppRoutes.GameEditRoute -> NavEntry(key) {
+                        val isOnline = NetworkUtils.isInternetAvailable(context)
+
+                        if (!isOnline) {
+                            LaunchedEffect(Unit) {
+                                backStack.removeLastOrNull()
+                            }
+
+                            Box(modifier = Modifier.padding(innerPadding)) {
+                                Text("Connexion internet requise")
+                            }
+                        } else {
+                            Box(modifier = Modifier.padding(innerPadding)) {
+                                GameEditScreen(
+                                    gameId = key.gameId,
+                                    onEditSuccess = {
+                                        gamesRefreshKey++
+                                        detailRefreshKey++
+                                        backStack.removeLastOrNull()
+                                    }
+                                )
+                            }
+                        }
+                    }
+
+                    AppRoutes.ExposantCreateRoute -> NavEntry(key) {
                         Box(modifier = Modifier.padding(innerPadding)) {
-                            GameEditScreen(
-                                gameId = key.gameId,
-                                onEditSuccess = {
-                                    gamesRefreshKey++
-                                    detailRefreshKey++
+                            ExposantFormScreen(
+                                mode = ExposantFormMode.CREATE,
+                                exposant = null,
+                                onBackClick = {
+                                    backStack.removeLastOrNull()
+                                },
+                                onSaveClick = { formData ->
+                                    exposantViewModel.saveNewExposant(formData)
                                     backStack.removeLastOrNull()
                                 }
                             )
@@ -371,6 +482,86 @@ fun ClickerNavHost(
                                     backStack.removeLastOrNull()
                                 }
                             )
+                    is AppRoutes.ExposantDetailRoute -> NavEntry(key) {
+                        val exposant = exposantUiState.findExposantById(key.exposantId)
+
+                        Box(modifier = Modifier.padding(innerPadding)) {
+                            when {
+                                exposantUiState.isLoading -> {
+                                    Box(
+                                        modifier = Modifier.fillMaxSize(),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        CircularProgressIndicator()
+                                    }
+                                }
+
+                                exposant == null -> {
+                                    Box(
+                                        modifier = Modifier.fillMaxSize(),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text("Exposant introuvable")
+                                    }
+                                }
+
+                                else -> {
+                                    DetailsExposantScreen(
+                                        exposant = exposant,
+                                        onBackClick = {
+                                            backStack.removeLastOrNull()
+                                        },
+                                        onEditClick = {
+                                            backStack.add(AppRoutes.ExposantEditRoute(key.exposantId))
+                                        },
+                                        onDeleteClick = {
+                                            exposantViewModel.deleteExposantById(key.exposantId)
+                                            backStack.removeLastOrNull()
+                                        },
+                                        modifier = Modifier.fillMaxSize()
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    is AppRoutes.ExposantEditRoute -> NavEntry(key) {
+                        val exposant = exposantUiState.findExposantById(key.exposantId)
+
+                        Box(modifier = Modifier.padding(innerPadding)) {
+                            when {
+                                exposantUiState.isLoading -> {
+                                    Box(
+                                        modifier = Modifier.fillMaxSize(),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        CircularProgressIndicator()
+                                    }
+                                }
+
+                                exposant == null -> {
+                                    Box(
+                                        modifier = Modifier.fillMaxSize(),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text("Exposant introuvable")
+                                    }
+                                }
+
+                                else -> {
+                                    ExposantFormScreen(
+                                        mode = ExposantFormMode.EDIT,
+                                        exposant = exposant,
+                                        onBackClick = {
+                                            backStack.removeLastOrNull()
+                                        },
+                                        onSaveClick = { formData ->
+                                            exposantViewModel.updateExposant(key.exposantId, formData)
+                                            backStack.removeLastOrNull()
+                                        }
+                                    )
+                                }
+                            }
                         }
                     }
 
@@ -402,6 +593,10 @@ private fun isDestinationSelected(currentDestination: Any?, destination: Destina
                 currentDestination is AppRoutes.ZonesTarifRoute ||
                 currentDestination is AppRoutes.ZonesPlanRoute ||
                 currentDestination is AppRoutes.GenericEditRoute
+        Destination.EXPOSANTS -> currentDestination == Destination.EXPOSANTS ||
+                currentDestination == AppRoutes.ExposantCreateRoute ||
+                currentDestination is AppRoutes.ExposantDetailRoute ||
+                currentDestination is AppRoutes.ExposantEditRoute
 
         else -> currentDestination == destination
     }

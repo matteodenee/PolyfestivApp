@@ -1,8 +1,6 @@
-package com.example.clicker.ui.screens.games
+package com.example.clicker.ui.screens.exposants
 
-import android.util.Log
 import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -22,8 +20,8 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircleOutline
-import androidx.compose.material.icons.filled.Extension
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Storefront
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -36,68 +34,57 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import coil3.compose.AsyncImage
-import com.example.clicker.R
-import com.example.clicker.data.game.GameDto
+import com.example.clicker.data.exposants.Exposant
 import com.example.clicker.ui.theme.SearchField
 import com.example.clicker.ui.viewmodel.AppViewModelProvider
+import com.example.clicker.data.exposants.typeLabel
+import androidx.compose.runtime.collectAsState
+import androidx.compose.foundation.Image
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.layout.ContentScale
+import com.example.clicker.R
 
 @Composable
-fun GamesScreen(
-    refreshKey: Int,
-    canAdd: Boolean,
-    onAddClick: () -> Unit,
-    onGameClick: (Int) -> Unit,
+fun ExposantsScreen(
     modifier: Modifier = Modifier,
-    viewModel: GamesViewModel = viewModel(
-        factory = AppViewModelProvider.Factory
-    )
+    exposantViewModel: ExposantViewModel = viewModel(factory = AppViewModelProvider.Factory),
+    onAddClick: () -> Unit,
+    onDetailsClick: (Int) -> Unit
 ) {
-    LaunchedEffect(refreshKey) {
-        viewModel.loadGames()
-    }
-
-    val state = viewModel.state.value
-    var searchQuery by remember { mutableStateOf("") }
+    val uiState = exposantViewModel.uiState.collectAsState().value
     val colors = MaterialTheme.colorScheme
+    val listState = rememberLazyListState()
 
-    val listState = rememberLazyListState()// permet de savoir à quelle position on est dans la liste
+    LaunchedEffect(Unit) {
+        exposantViewModel.loadExposants()
+    }
 
     val maxHeaderHeight = 215.dp
     val minHeaderHeight = 90.dp
     val density = LocalDensity.current
-    val targetHeaderHeight by remember {// hauteur cible du header
+
+    val targetHeaderHeight by remember {
         derivedStateOf {
-            // Si on a scrollé au-delà du premier élément
             if (listState.firstVisibleItemIndex > 0) {
-                // On bloque directement à la hauteur minimale
                 minHeaderHeight
             } else {
-                // Sinon, on est encore sur le premier item donc on réduit progressivement le header
                 val scrollOffsetPx = listState.firstVisibleItemScrollOffset
                 val scrollOffsetDp = with(density) { scrollOffsetPx.toDp() }
-                // Calcul de la nouvelle hauteur :
-                (maxHeaderHeight - scrollOffsetDp)
-                    .coerceAtLeast(minHeaderHeight)
+                (maxHeaderHeight - scrollOffsetDp).coerceAtLeast(minHeaderHeight)
             }
         }
     }
 
-    // Animation de la hauteur du header
     val headerHeight by animateDpAsState(
         targetValue = targetHeaderHeight,
         label = "headerHeight"
@@ -108,7 +95,7 @@ fun GamesScreen(
             .fillMaxSize()
             .background(colors.background)
     ) {
-        HeaderSection(height = headerHeight)
+        ExposantsHeaderSection(height = headerHeight)
 
         Column(
             modifier = Modifier
@@ -121,7 +108,7 @@ fun GamesScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Jeux",
+                    text = "Exposants",
                     style = MaterialTheme.typography.headlineMedium.copy(
                         fontWeight = FontWeight.SemiBold,
                         color = colors.onBackground
@@ -130,7 +117,6 @@ fun GamesScreen(
 
                 Surface(
                     onClick = onAddClick,
-                    enabled = canAdd,
                     color = Color.Transparent
                 ) {
                     Row(
@@ -138,12 +124,8 @@ fun GamesScreen(
                         modifier = Modifier.padding(horizontal = 4.dp, vertical = 4.dp)
                     ) {
                         Text(
-                            text = "Ajouter un jeu",
-                            color = if (canAdd) {
-                                colors.onBackground
-                            } else { // bouton grisé
-                                colors.onBackground.copy(alpha = 0.4f)
-                            },
+                            text = "Ajouter un exposant",
+                            color = colors.onBackground,
                             style = MaterialTheme.typography.bodyLarge
                         )
 
@@ -151,12 +133,8 @@ fun GamesScreen(
 
                         Icon(
                             imageVector = Icons.Default.AddCircleOutline,
-                            contentDescription = "Ajouter un jeu",
-                            tint = if (canAdd) {
-                                colors.onBackground
-                            } else {
-                                colors.onBackground.copy(alpha = 0.4f)
-                            }
+                            contentDescription = "Ajouter un exposant",
+                            tint = colors.onBackground
                         )
                     }
                 }
@@ -164,15 +142,15 @@ fun GamesScreen(
 
             Spacer(modifier = Modifier.height(18.dp))
 
-            SearchBar(
-                value = searchQuery,
-                onValueChange = { searchQuery = it }
+            ExposantsSearchBar(
+                value = uiState.searchQuery,
+                onValueChange = exposantViewModel::onSearchQueryChange
             )
 
             Spacer(modifier = Modifier.height(14.dp))
 
-            when (val uiState = state) {
-                is GamesUiState.Loading -> {
+            when {
+                uiState.isLoading -> {
                     Box(
                         modifier = Modifier.fillMaxSize(),
                         contentAlignment = Alignment.Center
@@ -181,29 +159,22 @@ fun GamesScreen(
                     }
                 }
 
-                is GamesUiState.Error -> {
+                uiState.errorMessage != null -> {
                     Text(
-                        text = uiState.message,
+                        text = uiState.errorMessage ?: "Erreur inconnue",
                         color = MaterialTheme.colorScheme.error
                     )
                 }
 
-                is GamesUiState.Success -> {
-                    val filteredGames = uiState.games.filter { game ->
-                        val query = searchQuery.trim().lowercase()
-                        query.isBlank() ||
-                                game.name.lowercase().contains(query) ||
-                                game.author.lowercase().contains(query)
-                    }
-
+                else -> {
                     LazyColumn(
                         state = listState,
                         modifier = Modifier.weight(1f)
                     ) {
-                        items(filteredGames) { game ->
-                            GameItem(
-                                game = game,
-                                onClick = { onGameClick(game.id) }
+                        items(uiState.filteredExposants) { exposant ->
+                            ExposantItem(
+                                exposant = exposant,
+                                onClick = { onDetailsClick(exposant.id) }
                             )
                         }
                     }
@@ -214,23 +185,23 @@ fun GamesScreen(
 }
 
 @Composable
-private fun HeaderSection(height: Dp) {
+private fun ExposantsHeaderSection(height: Dp) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .height(height)
     ) {
         Image(
-            painter = painterResource(R.drawable.games_header),
-            contentDescription = "Header jeux",
-            modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Crop
+            painter = painterResource(id = R.drawable.exposants_header),
+            contentDescription = "Header exposants",
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.fillMaxSize()
         )
     }
 }
 
 @Composable
-private fun SearchBar(
+private fun ExposantsSearchBar(
     value: String,
     onValueChange: (String) -> Unit
 ) {
@@ -244,7 +215,7 @@ private fun SearchBar(
             .clip(RoundedCornerShape(27.dp)),
         placeholder = {
             Text(
-                text = "Rechercher un jeu",
+                text = "Rechercher un exposant",
                 color = colors.onSurface.copy(alpha = 0.7f)
             )
         },
@@ -268,11 +239,10 @@ private fun SearchBar(
 }
 
 @Composable
-private fun GameItem(
-    game: GameDto,
+private fun ExposantItem(
+    exposant: Exposant,
     onClick: () -> Unit
 ) {
-    val imageUrl = game.imageUrl.trim()
     val colors = MaterialTheme.colorScheme
 
     Column(
@@ -285,51 +255,26 @@ private fun GameItem(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            if (imageUrl.isNotEmpty()) {
-                AsyncImage(
-                    model = imageUrl,
-                    contentDescription = "Image de ${game.name}",
-                    modifier = Modifier
-                        .size(82.dp)
-                        .clip(RoundedCornerShape(18.dp))
-                        .background(colors.surfaceVariant),
-                    contentScale = ContentScale.Crop,
-                    onError = { state ->
-                        Log.e(
-                            "GAME_IMAGE",
-                            "Erreur chargement URL = $imageUrl",
-                            state.result.throwable
-                        )
-                    },
-                    onSuccess = {
-                        Log.d(
-                            "GAME_IMAGE",
-                            "Succès chargement URL = $imageUrl"
-                        )
-                    }
+            Box(
+                modifier = Modifier
+                    .size(82.dp)
+                    .clip(RoundedCornerShape(18.dp))
+                    .background(colors.surfaceVariant),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Storefront,
+                    contentDescription = null,
+                    tint = colors.outline,
+                    modifier = Modifier.size(34.dp)
                 )
-            } else {
-                Box(
-                    modifier = Modifier
-                        .size(82.dp)
-                        .clip(RoundedCornerShape(18.dp))
-                        .background(colors.surfaceVariant),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Extension,
-                        contentDescription = null,
-                        tint = colors.outline,
-                        modifier = Modifier.size(34.dp)
-                    )
-                }
             }
 
             Spacer(modifier = Modifier.width(16.dp))
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = game.name,
+                    text = exposant.name,
                     style = MaterialTheme.typography.titleLarge.copy(
                         fontWeight = FontWeight.SemiBold,
                         color = colors.onBackground
@@ -339,7 +284,7 @@ private fun GameItem(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Text(
-                    text = "Auteur: ${game.author}",
+                    text = "Type : ${exposant.typeLabel()}",
                     style = MaterialTheme.typography.bodyMedium.copy(
                         color = colors.onBackground.copy(alpha = 0.8f)
                     )

@@ -3,6 +3,7 @@ package com.example.clicker.ui.navigation
 sealed interface AppRoutes {
     data object LOGIN : AppRoutes
     data object REGISTER : AppRoutes
+
     data object GameCreateRoute : AppRoutes
     data class GameDetailRoute(val gameId: Int) : AppRoutes
     data class GameEditRoute(val gameId: Int) : AppRoutes
@@ -18,4 +19,8 @@ sealed interface AppRoutes {
     
     // Generic edit route, uses screenTitle and fields based on what it's editing
     data class GenericEditRoute(val screenTitle: String) : AppRoutes
+
+    data object ExposantCreateRoute : AppRoutes
+    data class ExposantDetailRoute(val exposantId: Int) : AppRoutes
+    data class ExposantEditRoute(val exposantId: Int) : AppRoutes
 }
