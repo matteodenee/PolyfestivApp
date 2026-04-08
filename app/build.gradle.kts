@@ -42,7 +42,12 @@ android {
 
 dependencies {
     implementation("androidx.datastore:datastore-preferences:1.0.0")
-
+    implementation(libs.androidx.room.runtime)
+    implementation("androidx.compose.runtime:runtime:1.10.5")
+    implementation(libs.androidx.material3)
+    ksp(libs.androidx.room.compiler)
+    implementation(libs.androidx.room.ktx)
+    implementation("com.squareup.okhttp3:okhttp-urlconnection:4.12.0")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)

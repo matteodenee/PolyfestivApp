@@ -4,6 +4,11 @@ import android.content.Context
 import com.example.clicker.data.auth.AuthRepository
 import com.example.clicker.data.exposants.ExposantRepository
 import com.example.clicker.data.game.GamesRepository
+import com.example.clicker.data.festival.FestivalsRepository
+import com.example.clicker.data.table.TablesRepository
+import com.example.clicker.data.equipment.EquipmentsRepository
+import com.example.clicker.data.zone.TariffZonesRepository
+import com.example.clicker.data.zone.MapZonesRepository
 import com.example.clicker.data.local.game.GameDatabase
 import com.example.clicker.data.network.RetrofitInstance
 import com.example.clicker.data.admin.AdminRepository
@@ -51,23 +56,37 @@ class AppDataContainer(
         ReservationGameRepository(RetrofitInstance.reservationGameApi)
     }
 
-    override val tarifZoneRepository: TarifZoneRepository by lazy {
-        TarifZoneRepository(RetrofitInstance.tarifZoneApi)
-    }
-
     override val reservationNoteRepository: ReservationNoteRepository by lazy {
         ReservationNoteRepository(
             RetrofitInstance.reservationNoteApi
         )
     }
-
+    
     override val reservationContactRepository: ReservationContactRepository by lazy {
         ReservationContactRepository(RetrofitInstance.reservationContactApi)
     }
     override val invoiceRepository: InvoiceRepository by lazy {
         InvoiceRepository(RetrofitInstance.invoiceApi)
     }
-    override val equipmentRepository: EquipmentRepository by lazy {
-        EquipmentRepository(RetrofitInstance.equipmentApi)
+
+    override val festivalsRepository: FestivalsRepository by lazy {
+        FestivalsRepository(RetrofitInstance.festivalsApi)
+    }
+
+    override val tablesRepository: TablesRepository by lazy {
+        TablesRepository(RetrofitInstance.tablesApi)
+    }
+
+    override val equipmentsRepository: EquipmentsRepository by lazy {
+        EquipmentsRepository(RetrofitInstance.equipmentsApi)
+    }
+
+    override val tariffZonesRepository: TariffZonesRepository by lazy {
+        TariffZonesRepository(RetrofitInstance.tariffZonesApi)
+    }
+
+    override val mapZonesRepository: MapZonesRepository by lazy {
+        MapZonesRepository(RetrofitInstance.mapZonesApi)
     }
 }
+
