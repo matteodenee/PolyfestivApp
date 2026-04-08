@@ -85,7 +85,6 @@ object RetrofitInstance {
     val mapZonesApi: MapZonesApiService by lazy {
         retrofit.create(MapZonesApiService::class.java)
     }
-}
     val adminApi: AdminApiService by lazy {
         retrofit.create(AdminApiService::class.java)
     }

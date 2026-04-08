@@ -18,7 +18,6 @@ interface AppContainer {
     val equipmentsRepository: EquipmentsRepository
     val tariffZonesRepository: TariffZonesRepository
     val mapZonesRepository: MapZonesRepository
-}
     val adminRepository: AdminRepository
     val exposantRepository: ExposantRepository
 }

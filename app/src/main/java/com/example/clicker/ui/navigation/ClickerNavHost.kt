@@ -482,6 +482,9 @@ fun ClickerNavHost(
                                     backStack.removeLastOrNull()
                                 }
                             )
+                        }
+                    }
+
                     is AppRoutes.ExposantDetailRoute -> NavEntry(key) {
                         val exposant = exposantUiState.findExposantById(key.exposantId)
 
