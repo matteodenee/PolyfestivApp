@@ -1,6 +1,5 @@
 package com.example.clicker.ui.navigation
 
-import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -40,6 +39,10 @@ import com.example.clicker.ui.screens.exposants.ExposantFormMode
 import com.example.clicker.ui.screens.exposants.ExposantFormScreen
 import com.example.clicker.ui.screens.exposants.ExposantViewModel
 import com.example.clicker.ui.screens.exposants.ExposantsScreen
+import com.example.clicker.ui.screens.festivalDetail.FestivalDetailScreen
+import com.example.clicker.ui.screens.festivalDetail.FestivalModifScreen
+import com.example.clicker.ui.screens.festivalList.FestivalCreateScreen
+import com.example.clicker.ui.screens.festivalList.FestivalScreen
 import com.example.clicker.ui.screens.gameCreate.GameCreateScreen
 import com.example.clicker.ui.screens.gameDetail.GameDetailScreen
 import com.example.clicker.ui.screens.gameEdit.GameEditScreen
@@ -47,10 +50,13 @@ import com.example.clicker.ui.screens.games.GamesScreen
 import com.example.clicker.ui.screens.login.LoginScreen
 import com.example.clicker.ui.screens.login.LoginViewModel
 import com.example.clicker.ui.screens.register.RegisterScreen
-import com.example.clicker.ui.screens.festivalList.FestivalScreen
-import com.example.clicker.ui.screens.festivalDetail.FestivalDetailScreen
-import com.example.clicker.ui.screens.festivalDetail.FestivalModifScreen
-import com.example.clicker.ui.screens.festivalList.FestivalCreateScreen
+import com.example.clicker.ui.screens.reservationContact.ReservationContactScreen
+import com.example.clicker.ui.screens.reservationCreate.ReservationCreateScreen
+import com.example.clicker.ui.screens.reservationDetail.ReservationDetailScreen
+import com.example.clicker.ui.screens.reservationInvoice.ReservationInvoiceScreen
+import com.example.clicker.ui.screens.reservationNote.ReservationNoteScreen
+import com.example.clicker.ui.screens.reservationSupplies.ReservationSuppliesScreen
+import com.example.clicker.ui.screens.reservations.ReservationsScreen
 import com.example.clicker.ui.theme.PrimaryYellow
 import com.example.clicker.ui.utils.network.NetworkUtils
 import com.example.clicker.ui.viewmodel.AppViewModelProvider
@@ -68,6 +74,8 @@ fun ClickerNavHost(
     var festivalsRefreshKey by remember { mutableIntStateOf(0) }
     var detailRefreshKey by remember { mutableIntStateOf(0) }
     var adminRefreshKey by remember { mutableIntStateOf(0) }
+    var reservationRefreshKey by remember { mutableIntStateOf(0) }
+
     val context = LocalContext.current
 
     LaunchedEffect(Unit) {
@@ -104,9 +112,12 @@ fun ClickerNavHost(
                                 Destination.JEUX -> "Jeux"
                                 Destination.EXPOSANTS -> "Exposants"
                                 Destination.ADMIN -> "Admin"
-                                AppRoutes.GameCreateRoute -> "Ajout"
-                                is AppRoutes.GameDetailRoute -> "Détail"
-                                is AppRoutes.GameEditRoute -> "Modification"
+                                AppRoutes.GameCreateRoute,
+                                AppRoutes.ExposantCreateRoute -> "Ajout"
+                                is AppRoutes.GameDetailRoute,
+                                is AppRoutes.ExposantDetailRoute -> "Détail"
+                                is AppRoutes.GameEditRoute,
+                                is AppRoutes.ExposantEditRoute -> "Modification"
                                 AppRoutes.FestivalCreateRoute -> "Nouveau Festival"
                                 is AppRoutes.FestivalDetailRoute -> "Détail Festival"
                                 is AppRoutes.FestivalModifRoute -> "Modification"
@@ -116,12 +127,13 @@ fun ClickerNavHost(
                                 is AppRoutes.ZonesTarifRoute -> "Zones tarifaires"
                                 is AppRoutes.ZonesPlanRoute -> "Zones du plan"
                                 is AppRoutes.GenericEditRoute -> currentDestination.screenTitle.replace("Plan ", "")
-                                AppRoutes.GameCreateRoute,
-                                AppRoutes.ExposantCreateRoute -> "Ajout"
-                                is AppRoutes.GameDetailRoute,
-                                is AppRoutes.ExposantDetailRoute -> "Détail"
-                                is AppRoutes.GameEditRoute,
-                                is AppRoutes.ExposantEditRoute -> "Modification"
+                                is AppRoutes.ReservationsRoute -> "Réservations"
+                                is AppRoutes.ReservationCreateRoute -> "Nouvelle réservation"
+                                is AppRoutes.ReservationDetailRoute -> "Détail"
+                                is AppRoutes.ReservationSuppliesRoute -> "Fournitures"
+                                is AppRoutes.ReservationContactRoute -> "Prise de contact"
+                                is AppRoutes.ReservationNoteRoute -> "Note"
+                                is AppRoutes.ReservationInvoiceRoute -> "Facture"
                                 else -> "Clicker"
                             }
                         )
@@ -246,138 +258,13 @@ fun ClickerNavHost(
                         }
                     }
 
-                    Destination.JEUX -> NavEntry(key) {
-                        val isOnline = NetworkUtils.isInternetAvailable(context)
-
-                        Box(modifier = Modifier.padding(innerPadding)) {
-                            GamesScreen(
-                                refreshKey = gamesRefreshKey,
-                                canAdd = isOnline,
-                                onGameClick = { gameId ->
-                                    backStack.add(AppRoutes.GameDetailRoute(gameId))
-                                },
-                                onAddClick = {
-                                    if (NetworkUtils.isInternetAvailable(context)) {
-                                        backStack.add(AppRoutes.GameCreateRoute)
-                                    }
-                                }
-                            )
-                        }
-                    }
-
-                    Destination.EXPOSANTS -> NavEntry(key) {
-                        Box(modifier = Modifier.padding(innerPadding)) {
-                            ExposantsScreen(
-                                exposantViewModel = exposantViewModel,
-                                onAddClick = {
-                                    backStack.add(AppRoutes.ExposantCreateRoute)
-                                },
-                                onDetailsClick = { exposantId ->
-                                    backStack.add(AppRoutes.ExposantDetailRoute(exposantId))
-                                }
-                            )
-                        }
-                    }
-
-                    Destination.ADMIN -> NavEntry(key) {
-                        Box(modifier = Modifier.padding(innerPadding)) {
-                            AdminScreen(
-                                refreshKey = adminRefreshKey
-                            )
-                        }
-                    }
-
-                    AppRoutes.GameCreateRoute -> NavEntry(key) {
-                        val isOnline = NetworkUtils.isInternetAvailable(context)
-
-                        if (!isOnline) {
-                            LaunchedEffect(Unit) {
-                                backStack.removeLastOrNull()
-                            }
-
-                            Box(modifier = Modifier.padding(innerPadding)) {
-                                Text("Connexion internet requise")
-                            }
-                        } else {
-                            Box(modifier = Modifier.padding(innerPadding)) {
-                                GameCreateScreen(
-                                    onCreateSuccess = {
-                                        gamesRefreshKey++
-                                        backStack.removeLastOrNull()
-                                    }
-                                )
-                            }
-                        }
-                    }
-
-                    is AppRoutes.GameDetailRoute -> NavEntry(key) {
-                        val isOnline = NetworkUtils.isInternetAvailable(context)
-
-                        Box(modifier = Modifier.padding(innerPadding)) {
-                            GameDetailScreen(
-                                gameId = key.gameId,
-                                refreshKey = detailRefreshKey,
-                                canDelete = isOnline,
-                                canEdit = isOnline,
-                                onEditClick = { gameId ->
-                                    backStack.add(AppRoutes.GameEditRoute(gameId))
-                                },
-                                onDeleteSuccess = {
-                                    gamesRefreshKey++
-                                    backStack.removeLastOrNull()
-                                }
-                            )
-                        }
-                    }
-
-                    is AppRoutes.GameEditRoute -> NavEntry(key) {
-                        val isOnline = NetworkUtils.isInternetAvailable(context)
-
-                        if (!isOnline) {
-                            LaunchedEffect(Unit) {
-                                backStack.removeLastOrNull()
-                            }
-
-                            Box(modifier = Modifier.padding(innerPadding)) {
-                                Text("Connexion internet requise")
-                            }
-                        } else {
-                            Box(modifier = Modifier.padding(innerPadding)) {
-                                GameEditScreen(
-                                    gameId = key.gameId,
-                                    onEditSuccess = {
-                                        gamesRefreshKey++
-                                        detailRefreshKey++
-                                        backStack.removeLastOrNull()
-                                    }
-                                )
-                            }
-                        }
-                    }
-
-                    AppRoutes.ExposantCreateRoute -> NavEntry(key) {
-                        Box(modifier = Modifier.padding(innerPadding)) {
-                            ExposantFormScreen(
-                                mode = ExposantFormMode.CREATE,
-                                exposant = null,
-                                onBackClick = {
-                                    backStack.removeLastOrNull()
-                                },
-                                onSaveClick = { formData ->
-                                    exposantViewModel.saveNewExposant(formData)
-                                    backStack.removeLastOrNull()
-                                }
-                            )
-                        }
-                    }
-
                     AppRoutes.FestivalCreateRoute -> NavEntry(key) {
                         Box(modifier = Modifier.padding(innerPadding)) {
                             FestivalCreateScreen(
                                 onCreateSuccess = { festivalId ->
                                     festivalsRefreshKey++
-                                    backStack.removeLastOrNull() // Pop create screen
-                                    backStack.add(AppRoutes.FestivalDetailRoute(festivalId)) // Go to detail
+                                    backStack.removeLastOrNull()
+                                    backStack.add(AppRoutes.FestivalDetailRoute(festivalId))
                                 }
                             )
                         }
@@ -390,6 +277,9 @@ fun ClickerNavHost(
                                 refreshKey = detailRefreshKey,
                                 onEditClick = { festivalId ->
                                     backStack.add(AppRoutes.FestivalModifRoute(festivalId))
+                                },
+                                onReservationsClick = { festivalId ->
+                                    backStack.add(AppRoutes.ReservationsRoute(festivalId))
                                 },
                                 onDeleteSuccess = {
                                     festivalsRefreshKey++
@@ -485,6 +375,206 @@ fun ClickerNavHost(
                         }
                     }
 
+                    is AppRoutes.ReservationsRoute -> NavEntry(key) {
+                        Box(modifier = Modifier.padding(innerPadding)) {
+                            ReservationsScreen(
+                                festivalId = key.festivalId,
+                                refreshKey = reservationRefreshKey,
+                                onAddClick = {
+                                    backStack.add(AppRoutes.ReservationCreateRoute(key.festivalId))
+                                },
+                                onReservationClick = { reservation ->
+                                    backStack.add(AppRoutes.ReservationDetailRoute(reservation))
+                                }
+                            )
+                        }
+                    }
+
+                    is AppRoutes.ReservationCreateRoute -> NavEntry(key) {
+                        Box(modifier = Modifier.padding(innerPadding)) {
+                            ReservationCreateScreen(
+                                festivalId = key.festivalId,
+                                onCreateSuccess = {
+                                    reservationRefreshKey++
+                                    backStack.removeLastOrNull()
+                                }
+                            )
+                        }
+                    }
+
+                    is AppRoutes.ReservationDetailRoute -> NavEntry(key) {
+                        Box(modifier = Modifier.padding(innerPadding)) {
+                            ReservationDetailScreen(
+                                reservation = key.reservation,
+                                onDeleteSuccess = {
+                                    reservationRefreshKey++
+                                    backStack.removeLastOrNull()
+                                },
+                                onSuppliesClick = { _, _ ->
+                                    backStack.add(AppRoutes.ReservationSuppliesRoute(key.reservation))
+                                },
+                                onInvoiceClick = {
+                                    backStack.add(AppRoutes.ReservationInvoiceRoute(key.reservation))
+                                },
+                                onContactClick = {
+                                    backStack.add(AppRoutes.ReservationContactRoute(key.reservation))
+                                },
+                                onNoteClick = {
+                                    backStack.add(AppRoutes.ReservationNoteRoute(key.reservation))
+                                }
+                            )
+                        }
+                    }
+
+                    is AppRoutes.ReservationSuppliesRoute -> NavEntry(key) {
+                        Box(modifier = Modifier.padding(innerPadding)) {
+                            ReservationSuppliesScreen(
+                                reservation = key.reservation
+                            )
+                        }
+                    }
+
+                    is AppRoutes.ReservationContactRoute -> NavEntry(key) {
+                        Box(modifier = Modifier.padding(innerPadding)) {
+                            ReservationContactScreen(
+                                reservation = key.reservation
+                            )
+                        }
+                    }
+
+                    is AppRoutes.ReservationNoteRoute -> NavEntry(key) {
+                        Box(modifier = Modifier.padding(innerPadding)) {
+                            ReservationNoteScreen(
+                                reservation = key.reservation
+                            )
+                        }
+                    }
+
+                    is AppRoutes.ReservationInvoiceRoute -> NavEntry(key) {
+                        Box(modifier = Modifier.padding(innerPadding)) {
+                            ReservationInvoiceScreen(
+                                reservation = key.reservation
+                            )
+                        }
+                    }
+
+                    Destination.JEUX -> NavEntry(key) {
+                        val isOnline = NetworkUtils.isInternetAvailable(context)
+
+                        Box(modifier = Modifier.padding(innerPadding)) {
+                            GamesScreen(
+                                refreshKey = gamesRefreshKey,
+                                canAdd = isOnline,
+                                onGameClick = { gameId ->
+                                    backStack.add(AppRoutes.GameDetailRoute(gameId))
+                                },
+                                onAddClick = {
+                                    if (NetworkUtils.isInternetAvailable(context)) {
+                                        backStack.add(AppRoutes.GameCreateRoute)
+                                    }
+                                }
+                            )
+                        }
+                    }
+
+                    AppRoutes.GameCreateRoute -> NavEntry(key) {
+                        val isOnline = NetworkUtils.isInternetAvailable(context)
+
+                        if (!isOnline) {
+                            LaunchedEffect(Unit) {
+                                backStack.removeLastOrNull()
+                            }
+
+                            Box(modifier = Modifier.padding(innerPadding)) {
+                                Text("Connexion internet requise")
+                            }
+                        } else {
+                            Box(modifier = Modifier.padding(innerPadding)) {
+                                GameCreateScreen(
+                                    onCreateSuccess = {
+                                        gamesRefreshKey++
+                                        backStack.removeLastOrNull()
+                                    }
+                                )
+                            }
+                        }
+                    }
+
+                    is AppRoutes.GameDetailRoute -> NavEntry(key) {
+                        val isOnline = NetworkUtils.isInternetAvailable(context)
+
+                        Box(modifier = Modifier.padding(innerPadding)) {
+                            GameDetailScreen(
+                                gameId = key.gameId,
+                                refreshKey = detailRefreshKey,
+                                canDelete = isOnline,
+                                canEdit = isOnline,
+                                onEditClick = { gameId ->
+                                    backStack.add(AppRoutes.GameEditRoute(gameId))
+                                },
+                                onDeleteSuccess = {
+                                    gamesRefreshKey++
+                                    backStack.removeLastOrNull()
+                                }
+                            )
+                        }
+                    }
+
+                    is AppRoutes.GameEditRoute -> NavEntry(key) {
+                        val isOnline = NetworkUtils.isInternetAvailable(context)
+
+                        if (!isOnline) {
+                            LaunchedEffect(Unit) {
+                                backStack.removeLastOrNull()
+                            }
+
+                            Box(modifier = Modifier.padding(innerPadding)) {
+                                Text("Connexion internet requise")
+                            }
+                        } else {
+                            Box(modifier = Modifier.padding(innerPadding)) {
+                                GameEditScreen(
+                                    gameId = key.gameId,
+                                    onEditSuccess = {
+                                        gamesRefreshKey++
+                                        detailRefreshKey++
+                                        backStack.removeLastOrNull()
+                                    }
+                                )
+                            }
+                        }
+                    }
+
+                    Destination.EXPOSANTS -> NavEntry(key) {
+                        Box(modifier = Modifier.padding(innerPadding)) {
+                            ExposantsScreen(
+                                exposantViewModel = exposantViewModel,
+                                onAddClick = {
+                                    backStack.add(AppRoutes.ExposantCreateRoute)
+                                },
+                                onDetailsClick = { exposantId ->
+                                    backStack.add(AppRoutes.ExposantDetailRoute(exposantId))
+                                }
+                            )
+                        }
+                    }
+
+                    AppRoutes.ExposantCreateRoute -> NavEntry(key) {
+                        Box(modifier = Modifier.padding(innerPadding)) {
+                            ExposantFormScreen(
+                                mode = ExposantFormMode.CREATE,
+                                exposant = null,
+                                onBackClick = {
+                                    backStack.removeLastOrNull()
+                                },
+                                onSaveClick = { formData ->
+                                    exposantViewModel.saveNewExposant(formData)
+                                    backStack.removeLastOrNull()
+                                }
+                            )
+                        }
+                    }
+
                     is AppRoutes.ExposantDetailRoute -> NavEntry(key) {
                         val exposant = exposantUiState.findExposantById(key.exposantId)
 
@@ -568,6 +658,14 @@ fun ClickerNavHost(
                         }
                     }
 
+                    Destination.ADMIN -> NavEntry(key) {
+                        Box(modifier = Modifier.padding(innerPadding)) {
+                            AdminScreen(
+                                refreshKey = adminRefreshKey
+                            )
+                        }
+                    }
+
                     else -> NavEntry(key) {
                         Box(modifier = Modifier.padding(innerPadding)) {
                             Text("Erreur")
@@ -581,12 +679,8 @@ fun ClickerNavHost(
 
 private fun isDestinationSelected(currentDestination: Any?, destination: Destination): Boolean {
     return when (destination) {
-        Destination.JEUX -> currentDestination == Destination.JEUX ||
-                currentDestination == AppRoutes.GameCreateRoute ||
-                currentDestination is AppRoutes.GameDetailRoute ||
-                currentDestination is AppRoutes.GameEditRoute
-
-        Destination.FESTIVALS -> currentDestination == Destination.FESTIVALS ||
+        Destination.FESTIVALS ->
+            currentDestination == Destination.FESTIVALS ||
                 currentDestination == AppRoutes.FestivalCreateRoute ||
                 currentDestination is AppRoutes.FestivalDetailRoute ||
                 currentDestination is AppRoutes.FestivalModifRoute ||
@@ -595,12 +689,27 @@ private fun isDestinationSelected(currentDestination: Any?, destination: Destina
                 currentDestination is AppRoutes.StockMaterielRoute ||
                 currentDestination is AppRoutes.ZonesTarifRoute ||
                 currentDestination is AppRoutes.ZonesPlanRoute ||
-                currentDestination is AppRoutes.GenericEditRoute
-        Destination.EXPOSANTS -> currentDestination == Destination.EXPOSANTS ||
+                currentDestination is AppRoutes.GenericEditRoute ||
+                currentDestination is AppRoutes.ReservationsRoute ||
+                currentDestination is AppRoutes.ReservationCreateRoute ||
+                currentDestination is AppRoutes.ReservationDetailRoute ||
+                currentDestination is AppRoutes.ReservationSuppliesRoute ||
+                currentDestination is AppRoutes.ReservationContactRoute ||
+                currentDestination is AppRoutes.ReservationNoteRoute ||
+                currentDestination is AppRoutes.ReservationInvoiceRoute
+
+        Destination.JEUX ->
+            currentDestination == Destination.JEUX ||
+                currentDestination == AppRoutes.GameCreateRoute ||
+                currentDestination is AppRoutes.GameDetailRoute ||
+                currentDestination is AppRoutes.GameEditRoute
+
+        Destination.EXPOSANTS ->
+            currentDestination == Destination.EXPOSANTS ||
                 currentDestination == AppRoutes.ExposantCreateRoute ||
                 currentDestination is AppRoutes.ExposantDetailRoute ||
                 currentDestination is AppRoutes.ExposantEditRoute
 
-        else -> currentDestination == destination
+        Destination.ADMIN -> currentDestination == Destination.ADMIN
     }
 }

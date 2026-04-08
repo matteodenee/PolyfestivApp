@@ -21,6 +21,13 @@ import com.example.clicker.ui.screens.festivalEdit.StockMaterielViewModel
 import com.example.clicker.ui.screens.festivalEdit.ZonesTarifViewModel
 import com.example.clicker.ui.screens.festivalEdit.ZonesPlanViewModel
 import com.example.clicker.ui.screens.admin.AdminViewModel
+import com.example.clicker.ui.screens.reservationDetail.ReservationDetailViewModel
+import com.example.clicker.ui.screens.reservations.ReservationsViewModel
+import com.example.clicker.ui.screens.reservationCreate.ReservationCreateViewModel
+import com.example.clicker.ui.screens.reservationSupplies.ReservationSuppliesViewModel
+import com.example.clicker.ui.screens.reservationNote.ReservationNoteViewModel
+import com.example.clicker.ui.screens.reservationContact.ReservationContactViewModel
+import com.example.clicker.ui.screens.reservationInvoice.ReservationInvoiceViewModel
 
 object AppViewModelProvider {
     val Factory = viewModelFactory {
@@ -70,7 +77,7 @@ object AppViewModelProvider {
                 clickerApplication().container.adminRepository
             )
         }
-        
+
         initializer {
             ExposantViewModel(
                 repository = clickerApplication().container.exposantRepository
@@ -122,6 +129,62 @@ object AppViewModelProvider {
         initializer {
             ZonesPlanViewModel(
                 clickerApplication().container.mapZonesRepository
+            )
+        }
+
+        initializer {
+            ReservationsViewModel(
+                clickerApplication().container.reservationsRepository,
+                clickerApplication().container.festivalsRepository,
+                clickerApplication().container.exposantRepository
+            )
+        }
+
+        initializer {
+            ReservationDetailViewModel(
+                clickerApplication().container.reservationsRepository,
+                clickerApplication().container.exposantRepository
+            )
+        }
+
+        initializer {
+            ReservationCreateViewModel(
+                clickerApplication().container.exposantRepository,
+                clickerApplication().container.reservationsRepository,
+                clickerApplication().container.festivalsRepository
+            )
+        }
+
+        initializer {
+            ReservationSuppliesViewModel(
+                clickerApplication().container.tariffZonesRepository,
+                clickerApplication().container.reservationTariffzoneAllocationRepository,
+                clickerApplication().container.reservationGameRepository,
+                clickerApplication().container.gamesRepository,
+                clickerApplication().container.reservationsRepository
+            )
+        }
+
+        initializer {
+            ReservationNoteViewModel(
+                clickerApplication().container.reservationNoteRepository
+            )
+        }
+
+        initializer {
+            ReservationContactViewModel(
+                clickerApplication().container.reservationContactRepository,
+                clickerApplication().container.reservationsRepository
+            )
+        }
+
+        initializer {
+            ReservationInvoiceViewModel(
+                clickerApplication().container.invoiceRepository,
+                clickerApplication().container.tariffZonesRepository,
+                clickerApplication().container.reservationTariffzoneAllocationRepository,
+                clickerApplication().container.reservationGameRepository,
+                clickerApplication().container.equipmentsRepository
             )
         }
     }

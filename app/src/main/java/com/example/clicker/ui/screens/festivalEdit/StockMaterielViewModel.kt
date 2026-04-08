@@ -6,10 +6,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.clicker.TAG
-import com.example.clicker.data.equipment.EquipmentDto
 import com.example.clicker.data.equipment.EquipmentRequest
 import com.example.clicker.data.equipment.EquipmentsRepository
 import kotlinx.coroutines.launch
+import com.example.clicker.data.equipment.EquipmentDto
 
 sealed interface StockMaterielUiState {
     data class Success(val equipments: List<EquipmentDto>) : StockMaterielUiState

@@ -12,6 +12,12 @@ import com.example.clicker.data.zone.MapZonesRepository
 import com.example.clicker.data.local.game.GameDatabase
 import com.example.clicker.data.network.RetrofitInstance
 import com.example.clicker.data.admin.AdminRepository
+import com.example.clicker.data.reservation.ReservationsRepository
+import com.example.clicker.data.reservationGame.ReservationGameRepository
+import com.example.clicker.data.reservationTariffzoneAllocation.ReservationTariffzoneAllocationRepository
+import com.example.clicker.data.reservationNote.ReservationNoteRepository
+import com.example.clicker.data.reservationContact.ReservationContactRepository
+import com.example.clicker.data.invoice.InvoiceRepository
 
 class AppDataContainer(
     private val context: Context
@@ -36,6 +42,31 @@ class AppDataContainer(
         AdminRepository(RetrofitInstance.adminApi)
     }
 
+    override val reservationsRepository: ReservationsRepository by lazy {
+        ReservationsRepository(RetrofitInstance.reservationsApi)
+    }
+
+    override val reservationTariffzoneAllocationRepository: ReservationTariffzoneAllocationRepository by lazy {
+        ReservationTariffzoneAllocationRepository(RetrofitInstance.reservationTariffzoneAllocationApi)
+    }
+
+    override val reservationGameRepository: ReservationGameRepository by lazy {
+        ReservationGameRepository(RetrofitInstance.reservationGameApi)
+    }
+
+    override val reservationNoteRepository: ReservationNoteRepository by lazy {
+        ReservationNoteRepository(
+            RetrofitInstance.reservationNoteApi
+        )
+    }
+
+    override val reservationContactRepository: ReservationContactRepository by lazy {
+        ReservationContactRepository(RetrofitInstance.reservationContactApi)
+    }
+    override val invoiceRepository: InvoiceRepository by lazy {
+        InvoiceRepository(RetrofitInstance.invoiceApi)
+    }
+
     override val festivalsRepository: FestivalsRepository by lazy {
         FestivalsRepository(RetrofitInstance.festivalsApi)
     }
@@ -56,3 +87,4 @@ class AppDataContainer(
         MapZonesRepository(RetrofitInstance.mapZonesApi)
     }
 }
+

@@ -9,6 +9,12 @@ import com.example.clicker.data.equipment.EquipmentsRepository
 import com.example.clicker.data.zone.TariffZonesRepository
 import com.example.clicker.data.zone.MapZonesRepository
 import com.example.clicker.data.admin.AdminRepository
+import com.example.clicker.data.reservation.ReservationsRepository
+import com.example.clicker.data.reservationGame.ReservationGameRepository
+import com.example.clicker.data.reservationTariffzoneAllocation.ReservationTariffzoneAllocationRepository
+import com.example.clicker.data.reservationNote.ReservationNoteRepository
+import com.example.clicker.data.reservationContact.ReservationContactRepository
+import com.example.clicker.data.invoice.InvoiceRepository
 
 interface AppContainer {
     val authRepository: AuthRepository
@@ -20,4 +26,11 @@ interface AppContainer {
     val mapZonesRepository: MapZonesRepository
     val adminRepository: AdminRepository
     val exposantRepository: ExposantRepository
+    val reservationsRepository: ReservationsRepository
+    val reservationTariffzoneAllocationRepository: ReservationTariffzoneAllocationRepository
+    val reservationGameRepository: ReservationGameRepository
+    val reservationNoteRepository: ReservationNoteRepository
+    val reservationContactRepository: ReservationContactRepository
+    val invoiceRepository: InvoiceRepository
 }
+

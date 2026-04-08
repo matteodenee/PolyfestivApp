@@ -15,6 +15,13 @@ import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
 import com.example.clicker.data.admin.AdminApiService
+import com.example.clicker.data.reservation.ReservationsApiService
+import com.example.clicker.data.reservationGame.ReservationGameApiService
+import com.example.clicker.data.reservationTariffzoneAllocation.ReservationTariffzoneAllocationApiService
+import com.example.clicker.data.reservationNote.ReservationNoteApiService
+import com.example.clicker.data.reservationContact.ReservationContactApiService
+import com.example.clicker.data.invoice.InvoiceApiService
+
 
 object RetrofitInstance {
 
@@ -90,5 +97,32 @@ object RetrofitInstance {
     }
     val exposantApi: ExposantApiService by lazy {
         retrofit.create(ExposantApiService::class.java)
+    }
+
+    val reservationsApi: ReservationsApiService by lazy {
+        retrofit.create(ReservationsApiService::class.java)
+    }
+
+    val reservationTariffzoneAllocationApi: ReservationTariffzoneAllocationApiService by lazy {
+        retrofit.create(ReservationTariffzoneAllocationApiService::class.java)
+    }
+
+
+    val reservationGameApi: ReservationGameApiService by lazy {
+        retrofit.create(ReservationGameApiService::class.java)
+    }
+
+
+    val reservationNoteApi: ReservationNoteApiService by lazy {
+        retrofit.create(ReservationNoteApiService::class.java)
+    }
+
+    val reservationContactApi: ReservationContactApiService by lazy {
+        retrofit.create(ReservationContactApiService::class.java)
+    }
+
+
+    val invoiceApi: InvoiceApiService by lazy {
+        retrofit.create(InvoiceApiService::class.java)
     }
 }
