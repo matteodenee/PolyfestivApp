@@ -9,7 +9,6 @@ import com.example.clicker.data.equipment.EquipmentsRepository
 import com.example.clicker.data.zone.TariffZonesRepository
 import com.example.clicker.data.zone.MapZonesRepository
 import com.example.clicker.data.admin.AdminRepository
-import com.example.clicker.data.equipment.EquipmentRepository
 import com.example.clicker.data.mapZone.MapZoneRepository
 import com.example.clicker.data.festivalTable.FestivalTableRepository
 import com.example.clicker.data.festivalEquipmentStock.FestivalEquipmentStockRepository
@@ -31,7 +30,6 @@ interface AppContainer {
     val mapZonesRepository: MapZonesRepository
     val adminRepository: AdminRepository
     val exposantRepository: ExposantRepository
-    val equipmentRepository: EquipmentRepository
     val mapZoneRepository: MapZoneRepository
     val festivalTableRepository: FestivalTableRepository
     val festivalEquipmentStockRepository: FestivalEquipmentStockRepository

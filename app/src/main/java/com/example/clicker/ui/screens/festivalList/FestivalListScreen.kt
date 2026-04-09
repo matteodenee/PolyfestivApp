@@ -65,7 +65,6 @@ fun FestivalScreen(
 
     val state = viewModel.state.value
     var searchQuery by remember { mutableStateOf("") }
-    var selectedTab by remember { mutableIntStateOf(0) } // 0 = Upcoming, 1 = Past
     val listState = rememberLazyListState()
 
     Column(
@@ -132,26 +131,6 @@ fun FestivalScreen(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // Segmented Tabs
-            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                // Upcoming
-                SegmentTab(
-                    text = "Upcoming",
-                    isSelected = selectedTab == 0,
-                    onClick = { selectedTab = 0 },
-                    modifier = Modifier.weight(1f)
-                )
-                // Past
-                SegmentTab(
-                    text = "Past",
-                    isSelected = selectedTab == 1,
-                    onClick = { selectedTab = 1 },
-                    modifier = Modifier.weight(1f)
-                )
-            }
-
-            Spacer(modifier = Modifier.height(20.dp))
-
             // Content List
             when (val uiState = state) {
                 is FestivalListUiState.Loading -> {
@@ -177,12 +156,6 @@ fun FestivalScreen(
                                 festival = festival,
                                 onClick = { onFestivalClick(festival.id) }
                             )
-                        }
-
-                        item {
-                            Spacer(modifier = Modifier.height(16.dp))
-                            OutlinedButtonCustom(text = "View All Festival", onClick = {})
-                            Spacer(modifier = Modifier.height(32.dp))
                         }
                     }
                 }
@@ -238,12 +211,10 @@ private fun SegmentTab(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val bgColor = if (isSelected) TabOrange else TabPurple
     val txtColor = if (isSelected) Color.White else TextDark
 
     Surface(
         onClick = onClick,
-        color = bgColor,
         shape = RoundedCornerShape(24.dp),
         modifier = modifier.height(44.dp)
     ) {

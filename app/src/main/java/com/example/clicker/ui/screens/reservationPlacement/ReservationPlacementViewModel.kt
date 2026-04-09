@@ -7,7 +7,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.clicker.data.equipment.EquipmentRepository
+import com.example.clicker.data.equipment.EquipmentsRepository
 import com.example.clicker.data.festivalEquipmentStock.FestivalEquipmentStockRepository
 import com.example.clicker.data.festivalTable.FestivalTableRepository
 import com.example.clicker.data.game.GamesRepository
@@ -19,7 +19,7 @@ import com.example.clicker.data.reservationGamePlacement.ReservationGamePlacemen
 import com.example.clicker.data.reservationTariffzoneAllocation.ReservationTariffzoneAllocationDto
 import com.example.clicker.data.reservationTariffzoneAllocation.ReservationTariffzoneAllocationRepository
 import com.example.clicker.data.reservationTariffzoneAllocation.ReservationTariffzoneAllocationRequest
-import com.example.clicker.data.tarifZone.TarifZoneRepository
+import com.example.clicker.data.zone.TariffZonesRepository
 import kotlinx.coroutines.launch
 import kotlin.math.ceil
 import retrofit2.HttpException
@@ -30,10 +30,10 @@ class ReservationPlacementViewModel(
     private val reservationGameRepository: ReservationGameRepository,
     private val reservationGamePlacementRepository: ReservationGamePlacementRepository,
     private val reservationTariffzoneAllocationRepository: ReservationTariffzoneAllocationRepository,
-    private val tarifZoneRepository: TarifZoneRepository,
+    private val TariffZonesRepository: TariffZonesRepository,
     private val mapZoneRepository: MapZoneRepository,
     private val festivalTableRepository: FestivalTableRepository,
-    private val equipmentRepository: EquipmentRepository,
+    private val EquipmentsRepository: EquipmentsRepository,
     private val festivalEquipmentStockRepository: FestivalEquipmentStockRepository,
     private val gamesRepository: GamesRepository
 ) : ViewModel() {
@@ -68,7 +68,7 @@ class ReservationPlacementViewModel(
                     reservationTariffzoneAllocationRepository.getAllocationsByReservation(reservation.id)
                 }
 
-                val tariffZones = tarifZoneRepository.getTarifZonesByFestival(festivalId)
+                val tariffZones = TariffZonesRepository.getTariffZonesByFestival(festivalId)
 
                 val mapZones = mapZoneRepository.getMapZonesByFestival(festivalId)
 
@@ -201,7 +201,7 @@ class ReservationPlacementViewModel(
 
                 val reservationAllocations = reservationTariffzoneAllocationRepository.getAllocationsByReservation(game.reservationId)
                 val festivalTables = festivalTableRepository.getTablesByFestival(festivalId)
-                val equipments = equipmentRepository.getEquipmentsByFestival(festivalId)
+                val equipments = EquipmentsRepository.getEquipmentsByFestival(festivalId)
                 val equipmentStocks = festivalEquipmentStockRepository.getStocksByFestival(festivalId)
 
                 val tablesNeeded = game.tablesNeeded
