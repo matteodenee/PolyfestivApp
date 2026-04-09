@@ -5,6 +5,7 @@ import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
+import retrofit2.http.Query
 
 interface GamesApiService {
 
@@ -13,6 +14,11 @@ interface GamesApiService {
 
     @GET("api/games/{id}")
     suspend fun getGameById(@Path("id") id: Int): GameDto
+
+    @GET("api/reservation-games")
+    suspend fun getGamesByFestival(
+        @Query("festivalId") festivalId: Int
+    ): List<ReservationGameDto>
 
     @POST("api/games")
     suspend fun createGame(@Body request: GameRequest): GameDto

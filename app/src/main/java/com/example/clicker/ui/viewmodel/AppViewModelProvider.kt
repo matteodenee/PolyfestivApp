@@ -5,7 +5,9 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.example.clicker.ClickerApplication
+import com.example.clicker.ui.screens.admin.AdminViewModel
 import com.example.clicker.ui.screens.exposants.ExposantViewModel
+import com.example.clicker.ui.screens.festivalGames.FestivalGamesViewModel
 import com.example.clicker.ui.screens.gameCreate.GameCreateViewModel
 import com.example.clicker.ui.screens.gameDetail.GameDetailViewModel
 import com.example.clicker.ui.screens.gameEdit.GameEditViewModel
@@ -20,7 +22,6 @@ import com.example.clicker.ui.screens.festivalEdit.StockTablesViewModel
 import com.example.clicker.ui.screens.festivalEdit.StockMaterielViewModel
 import com.example.clicker.ui.screens.festivalEdit.ZonesTarifViewModel
 import com.example.clicker.ui.screens.festivalEdit.ZonesPlanViewModel
-import com.example.clicker.ui.screens.admin.AdminViewModel
 import com.example.clicker.ui.screens.publicPlan.PublicPlanViewModel
 import com.example.clicker.ui.screens.reservationPlacement.ReservationPlacementViewModel
 import com.example.clicker.ui.screens.reservationDetail.ReservationDetailViewModel
@@ -54,6 +55,12 @@ object AppViewModelProvider {
         }
 
         initializer {
+            FestivalGamesViewModel(
+                clickerApplication().container.gamesRepository
+            )
+        }
+
+        initializer {
             GameDetailViewModel(
                 clickerApplication().container.gamesRepository,
                 clickerApplication().applicationContext
@@ -82,7 +89,8 @@ object AppViewModelProvider {
 
         initializer {
             ExposantViewModel(
-                repository = clickerApplication().container.exposantRepository
+                clickerApplication().container.exposantRepository,
+                clickerApplication().applicationContext
             )
         }
 

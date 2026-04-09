@@ -1,14 +1,17 @@
 package com.example.clicker.ui.navigation
 
+import androidx.compose.foundation.layout.Arrangement
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Logout
 import androidx.compose.material3.BottomAppBar
+import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -32,6 +35,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.ui.NavDisplay
@@ -39,8 +43,11 @@ import com.example.clicker.ui.screens.admin.AdminScreen
 import com.example.clicker.ui.screens.exposants.DetailsExposantScreen
 import com.example.clicker.ui.screens.exposants.ExposantFormMode
 import com.example.clicker.ui.screens.exposants.ExposantFormScreen
+import com.example.clicker.ui.screens.exposants.ExposantUiState
 import com.example.clicker.ui.screens.exposants.ExposantViewModel
 import com.example.clicker.ui.screens.exposants.ExposantsScreen
+import com.example.clicker.ui.screens.exposants.FestivalExposantsScreen
+import com.example.clicker.ui.screens.festivalGames.FestivalGamesScreen
 import com.example.clicker.ui.screens.festivalDetail.FestivalDetailScreen
 import com.example.clicker.ui.screens.festivalDetail.FestivalModifScreen
 import com.example.clicker.ui.screens.festivalEdit.GenericEditScreen
@@ -125,8 +132,16 @@ fun ClickerNavHost(
                                 Destination.ADMIN -> "Admin"
                                 AppRoutes.GameCreateRoute,
                                 AppRoutes.ExposantCreateRoute -> "Ajout"
+
                                 is AppRoutes.GameDetailRoute,
                                 is AppRoutes.ExposantDetailRoute -> "Détail"
+                                is AppRoutes.FestivalGamesRoute ->
+                                    currentDestination.festivalName?.let { "Jeux - $it" }
+                                        ?: "Jeux du festival"
+
+                                is AppRoutes.FestivalExposantsRoute ->
+                                    currentDestination.festivalName?.let { "Exposants - $it" }
+                                        ?: "Exposants du festival"
                                 is AppRoutes.ReservationDetailRoute -> "Détail"
                                 is AppRoutes.GameEditRoute,
                                 is AppRoutes.ExposantEditRoute -> "Modification"
@@ -287,6 +302,14 @@ fun ClickerNavHost(
                                 },
                                 onPlanClick = { festivalId ->
                                     backStack.add(AppRoutes.PublicPlanRoute(festivalId))
+                                },
+                                onOpenFestivalGames = { festivalId ->
+                                    backStack.add(
+                                        AppRoutes.FestivalGamesRoute(festivalId))
+                                },
+                                onOpenFestivalExposants = { festivalId ->
+                                    backStack.add(
+                                        AppRoutes.FestivalExposantsRoute(festivalId))
                                 },
                                 onDeleteSuccess = {
                                     festivalsRefreshKey++
@@ -511,6 +534,30 @@ fun ClickerNavHost(
                         }
                     }
 
+                    is AppRoutes.FestivalGamesRoute -> NavEntry(key) {
+                        Box(modifier = Modifier.padding(innerPadding)) {
+                            FestivalGamesScreen(
+                                festivalId = key.festivalId,
+                                festivalName = key.festivalName,
+                                onGameClick = { gameId ->
+                                    backStack.add(AppRoutes.GameDetailRoute(gameId))
+                                }
+                            )
+                        }
+                    }
+
+                    is AppRoutes.FestivalExposantsRoute -> NavEntry(key) {
+                        Box(modifier = Modifier.padding(innerPadding)) {
+                            FestivalExposantsScreen(
+                                festivalId = key.festivalId,
+                                festivalName = key.festivalName,
+                                onExposantClick = { exposantId ->
+                                    backStack.add(AppRoutes.ExposantDetailRoute(exposantId))
+                                }
+                            )
+                        }
+                    }
+
                     AppRoutes.GameCreateRoute -> NavEntry(key) {
                         val isOnline = NetworkUtils.isInternetAvailable(context)
 
@@ -594,6 +641,9 @@ fun ClickerNavHost(
                     }
 
                     AppRoutes.ExposantCreateRoute -> NavEntry(key) {
+                        val isOnline =
+                            (exposantUiState as? ExposantUiState.Success)?.isOnline == true
+
                         Box(modifier = Modifier.padding(innerPadding)) {
                             ExposantFormScreen(
                                 mode = ExposantFormMode.CREATE,
@@ -602,19 +652,23 @@ fun ClickerNavHost(
                                     backStack.removeLastOrNull()
                                 },
                                 onSaveClick = { formData ->
-                                    exposantViewModel.saveNewExposant(formData)
-                                    backStack.removeLastOrNull()
-                                }
+                                    exposantViewModel.saveNewExposant(formData) {
+                                        backStack.removeLastOrNull()
+                                    }
+                                },
+                                isOnline = isOnline
                             )
                         }
                     }
 
                     is AppRoutes.ExposantDetailRoute -> NavEntry(key) {
-                        val exposant = exposantUiState.findExposantById(key.exposantId)
+                        val exposantState = exposantUiState as? ExposantUiState.Success
+                        val exposant = exposantState?.exposants?.find { it.id == key.exposantId }
+                        val isOnline = exposantState?.isOnline == true
 
                         Box(modifier = Modifier.padding(innerPadding)) {
                             when {
-                                exposantUiState.isLoading -> {
+                                exposantUiState is ExposantUiState.Loading -> {
                                     Box(
                                         modifier = Modifier.fillMaxSize(),
                                         contentAlignment = Alignment.Center
@@ -642,9 +696,11 @@ fun ClickerNavHost(
                                             backStack.add(AppRoutes.ExposantEditRoute(key.exposantId))
                                         },
                                         onDeleteClick = {
-                                            exposantViewModel.deleteExposantById(key.exposantId)
-                                            backStack.removeLastOrNull()
+                                            exposantViewModel.deleteExposantById(key.exposantId) {
+                                                backStack.removeLastOrNull()
+                                            }
                                         },
+                                        isOnline = isOnline,
                                         modifier = Modifier.fillMaxSize()
                                     )
                                 }
@@ -653,11 +709,13 @@ fun ClickerNavHost(
                     }
 
                     is AppRoutes.ExposantEditRoute -> NavEntry(key) {
-                        val exposant = exposantUiState.findExposantById(key.exposantId)
+                        val exposantState = exposantUiState as? ExposantUiState.Success
+                        val exposant = exposantState?.exposants?.find { it.id == key.exposantId }
+                        val isOnline = exposantState?.isOnline == true
 
                         Box(modifier = Modifier.padding(innerPadding)) {
                             when {
-                                exposantUiState.isLoading -> {
+                                exposantUiState is ExposantUiState.Loading -> {
                                     Box(
                                         modifier = Modifier.fillMaxSize(),
                                         contentAlignment = Alignment.Center
@@ -683,9 +741,11 @@ fun ClickerNavHost(
                                             backStack.removeLastOrNull()
                                         },
                                         onSaveClick = { formData ->
-                                            exposantViewModel.updateExposant(key.exposantId, formData)
-                                            backStack.removeLastOrNull()
-                                        }
+                                            exposantViewModel.updateExposant(key.exposantId, formData) {
+                                                backStack.removeLastOrNull()
+                                            }
+                                        },
+                                        isOnline = isOnline
                                     )
                                 }
                             }
@@ -708,6 +768,33 @@ fun ClickerNavHost(
                 }
             }
         )
+    }
+}
+
+@Composable
+private fun TemporaryFestivalEntryScreen(
+    onOpenFestivalGames: () -> Unit,
+    onOpenFestivalExposants: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(24.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Text(
+            text = "Page festival temporaire",
+            style = MaterialTheme.typography.headlineSmall
+        )
+        Text(
+            text = "TODO : remplacer cet écran par le vrai détail festival et passer le vrai festivalId."
+        )
+        Button(onClick = onOpenFestivalGames) {
+            Text("Jeux du festival (test)")
+        }
+        Button(onClick = onOpenFestivalExposants) {
+            Text("Exposants du festival (test)")
+        }
     }
 }
 
@@ -738,13 +825,15 @@ private fun isDestinationSelected(currentDestination: Any?, destination: Destina
             currentDestination == Destination.JEUX ||
                 currentDestination == AppRoutes.GameCreateRoute ||
                 currentDestination is AppRoutes.GameDetailRoute ||
-                currentDestination is AppRoutes.GameEditRoute
+                currentDestination is AppRoutes.GameEditRoute ||
+                currentDestination is AppRoutes.FestivalGamesRoute
 
         Destination.EXPOSANTS ->
             currentDestination == Destination.EXPOSANTS ||
                 currentDestination == AppRoutes.ExposantCreateRoute ||
                 currentDestination is AppRoutes.ExposantDetailRoute ||
-                currentDestination is AppRoutes.ExposantEditRoute
+                currentDestination is AppRoutes.ExposantEditRoute ||
+                currentDestination is AppRoutes.FestivalExposantsRoute
 
         Destination.ADMIN -> currentDestination == Destination.ADMIN
     }

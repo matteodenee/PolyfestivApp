@@ -5,10 +5,12 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -16,7 +18,6 @@ import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -30,7 +31,6 @@ import com.example.clicker.data.exposants.ExposantFormData
 import com.example.clicker.data.exposants.availableActorRoles
 import com.example.clicker.data.exposants.toFormData
 import com.example.clicker.ui.theme.ButtonBlue
-import androidx.compose.foundation.layout.padding
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -39,6 +39,7 @@ fun ExposantFormScreen(
     exposant: Exposant?,
     onBackClick: () -> Unit,
     onSaveClick: (ExposantFormData) -> Unit,
+    isOnline: Boolean,
     modifier: Modifier = Modifier
 ) {
     val initialData = if (mode == ExposantFormMode.EDIT && exposant != null) {
@@ -174,7 +175,7 @@ fun ExposantFormScreen(
             },
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(containerColor = ButtonBlue),
-            enabled = name.isNotBlank() && role.isNotBlank()
+            enabled = isOnline && name.isNotBlank() && role.isNotBlank()
         ) {
             Text("Enregistrer")
         }
