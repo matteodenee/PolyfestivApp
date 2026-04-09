@@ -18,11 +18,14 @@ private val DarkColorScheme = darkColorScheme(
     tertiary = ButtonGreen,
     background = Color(0xFF121212),
     surface = Color(0xFF1E1E1E),
+    surfaceVariant = Color(0xFF2A2A2A),
     onPrimary = Color.Black,
     onSecondary = Color.White,
     onTertiary = Color.White,
     onBackground = Color(0xFFF5F5F5),
-    onSurface = Color(0xFFF5F5F5)
+    onSurface = Color(0xFFF5F5F5),
+    outline = Color(0xFF8A8A8A),
+    outlineVariant = Color(0xFF444444)
 )
 
 private val LightColorScheme = lightColorScheme(
@@ -31,11 +34,14 @@ private val LightColorScheme = lightColorScheme(
     tertiary = ButtonGreen,
     background = BackgroundBeige,
     surface = BackgroundBeige,
+    surfaceVariant = SearchField,
     onPrimary = Color.Black,
     onSecondary = Color.White,
     onTertiary = Color.White,
     onBackground = TextDark,
-    onSurface = TextDark
+    onSurface = TextDark,
+    outline = Color(0xFF9E9E9E),
+    outlineVariant = Color(0xFFCFC3D4)
 )
 
 @Composable

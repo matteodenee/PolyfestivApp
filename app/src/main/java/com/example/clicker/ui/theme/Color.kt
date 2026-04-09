@@ -15,3 +15,9 @@ val ButtonOrange = Color(0xFFFF5722)
 val SearchField = Color(0xFFD1CDD3)
 
 val TextDark = Color(0xFF333333)
+
+val BackgroundCream = Color(0xFFF7F0E5)
+val CardLilac = Color(0xFFE4DFF0)
+val BorderLilac = Color(0xFFC9BDD9)
+val AccentBlue = Color(0xFF4657C8)
+val TextSecondary = Color(0xFF6E6A73)
