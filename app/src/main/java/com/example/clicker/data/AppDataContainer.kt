@@ -13,7 +13,6 @@ import com.example.clicker.data.zone.TariffZonesRepository
 import com.example.clicker.data.zone.MapZonesRepository
 import com.example.clicker.data.local.game.GameDatabase
 import com.example.clicker.data.network.RetrofitInstance
-import com.example.clicker.data.admin.AdminRepository
 import com.example.clicker.data.mapZone.MapZoneRepository
 import com.example.clicker.data.festivalTable.FestivalTableRepository
 import com.example.clicker.data.festivalEquipmentStock.FestivalEquipmentStockRepository

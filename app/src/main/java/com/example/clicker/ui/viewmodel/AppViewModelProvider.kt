@@ -22,7 +22,6 @@ import com.example.clicker.ui.screens.festivalEdit.StockTablesViewModel
 import com.example.clicker.ui.screens.festivalEdit.StockMaterielViewModel
 import com.example.clicker.ui.screens.festivalEdit.ZonesTarifViewModel
 import com.example.clicker.ui.screens.festivalEdit.ZonesPlanViewModel
-import com.example.clicker.ui.screens.admin.AdminViewModel
 import com.example.clicker.ui.screens.publicPlan.PublicPlanViewModel
 import com.example.clicker.ui.screens.reservationPlacement.ReservationPlacementViewModel
 import com.example.clicker.ui.screens.reservationDetail.ReservationDetailViewModel
