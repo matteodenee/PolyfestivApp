@@ -1,5 +1,7 @@
 package com.example.clicker.ui.navigation
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -40,6 +42,8 @@ import com.example.clicker.ui.screens.exposants.ExposantFormScreen
 import com.example.clicker.ui.screens.exposants.ExposantViewModel
 import com.example.clicker.ui.screens.exposants.ExposantsScreen
 import com.example.clicker.ui.screens.festivalDetail.FestivalDetailScreen
+import com.example.clicker.ui.screens.festivalDetail.FestivalModifScreen
+import com.example.clicker.ui.screens.festivalList.FestivalCreateScreen
 import com.example.clicker.ui.screens.festivalList.FestivalScreen
 import com.example.clicker.ui.screens.gameCreate.GameCreateScreen
 import com.example.clicker.ui.screens.gameDetail.GameDetailScreen
@@ -61,6 +65,7 @@ import com.example.clicker.ui.utils.network.NetworkUtils
 import com.example.clicker.ui.viewmodel.AppViewModelProvider
 import com.example.clicker.ui.screens.publicPlan.PublicPlanScreen
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ClickerNavHost(
@@ -71,6 +76,7 @@ fun ClickerNavHost(
     val exposantUiState by exposantViewModel.uiState.collectAsState()
 
     var gamesRefreshKey by remember { mutableIntStateOf(0) }
+    var festivalsRefreshKey by remember { mutableIntStateOf(0) }
     var detailRefreshKey by remember { mutableIntStateOf(0) }
     var adminRefreshKey by remember { mutableIntStateOf(0) }
     var festivalsRefreshKey by remember { mutableIntStateOf(0) }
@@ -120,8 +126,18 @@ fun ClickerNavHost(
                                 is AppRoutes.ReservationDetailRoute -> "Détail"
                                 is AppRoutes.GameEditRoute,
                                 is AppRoutes.ExposantEditRoute -> "Modification"
+                                AppRoutes.FestivalCreateRoute -> "Nouveau Festival"
+                                is AppRoutes.FestivalDetailRoute -> "Détail Festival"
+                                is AppRoutes.FestivalModifRoute -> "Modification"
+                                is AppRoutes.ModifDetailRoute -> "Détail festival"
+                                is AppRoutes.StockTablesRoute -> "Stock tables"
+                                is AppRoutes.StockMaterielRoute -> "Stock matériel"
+                                is AppRoutes.ZonesTarifRoute -> "Zones tarifaires"
+                                is AppRoutes.ZonesPlanRoute -> "Zones du plan"
+                                is AppRoutes.GenericEditRoute -> currentDestination.screenTitle.replace("Plan ", "")
                                 is AppRoutes.ReservationsRoute -> "Réservations"
                                 is AppRoutes.ReservationCreateRoute -> "Nouvelle réservation"
+                                is AppRoutes.ReservationDetailRoute -> "Détail"
                                 is AppRoutes.ReservationSuppliesRoute -> "Fournitures"
                                 is AppRoutes.ReservationContactRoute -> "Prise de contact"
                                 is AppRoutes.ReservationNoteRoute -> "Note"
@@ -244,6 +260,11 @@ fun ClickerNavHost(
                                 refreshKey = festivalsRefreshKey,
                                 onFestivalClick = { festivalId ->
                                     backStack.add(AppRoutes.FestivalDetailRoute(festivalId))
+                                    },
+                                onAddClick = {
+                                    backStack.add(AppRoutes.FestivalCreateRoute)
+                                }
+                            )
                                 }
                             )
                         }
@@ -329,6 +350,209 @@ fun ClickerNavHost(
                         }
                     }
 
+                    AppRoutes.FestivalCreateRoute -> NavEntry(key) {
+                        Box(modifier = Modifier.padding(innerPadding)) {
+                            FestivalCreateScreen(
+                                onCreateSuccess = { festivalId ->
+                                    festivalsRefreshKey++
+                                    backStack.removeLastOrNull()
+                                    backStack.add(AppRoutes.FestivalDetailRoute(festivalId))
+                                }
+                            )
+                        }
+                    }
+
+                    is AppRoutes.FestivalDetailRoute -> NavEntry(key) {
+                        Box(modifier = Modifier.padding(innerPadding)) {
+                            FestivalDetailScreen(
+                                festivalId = key.festivalId,
+                                refreshKey = detailRefreshKey,
+                                onEditClick = { festivalId ->
+                                    backStack.add(AppRoutes.FestivalModifRoute(festivalId))
+                                },
+                                onReservationsClick = { festivalId ->
+                                    backStack.add(AppRoutes.ReservationsRoute(festivalId))
+                                },
+                                onPlacementClick = { festivalId ->
+                                    backStack.add(AppRoutes.ReservationPlacementRoute(festivalId))
+                                },
+                                onDeleteSuccess = {
+                                    festivalsRefreshKey++
+                                    backStack.removeLastOrNull()
+                                }
+                            )
+                        }
+                    }
+
+                    is AppRoutes.FestivalModifRoute -> NavEntry(key) {
+                        Box(modifier = Modifier.padding(innerPadding)) {
+                            FestivalModifScreen(
+                                festivalId = key.festivalId,
+                                onBackClick = {
+                                    backStack.removeLastOrNull()
+                                },
+                                onStepClick = { step ->
+                                    when (step) {
+                                        1 -> backStack.add(AppRoutes.ModifDetailRoute(key.festivalId))
+                                        2 -> backStack.add(AppRoutes.StockTablesRoute(key.festivalId))
+                                        3 -> backStack.add(AppRoutes.StockMaterielRoute(key.festivalId))
+                                        4 -> backStack.add(AppRoutes.ZonesTarifRoute(key.festivalId))
+                                        5 -> backStack.add(AppRoutes.ZonesPlanRoute(key.festivalId))
+                                    }
+                                }
+                            )
+                        }
+                    }
+
+                    is AppRoutes.ModifDetailRoute -> NavEntry(key) {
+                        Box(modifier = Modifier.padding(innerPadding)) {
+                            com.example.clicker.ui.screens.festivalEdit.ModifDetailScreen(
+                                festivalId = key.festivalId,
+                                onBackClick = {
+                                    backStack.removeLastOrNull()
+                                }
+                            )
+                        }
+                    }
+
+                    is AppRoutes.StockTablesRoute -> NavEntry(key) {
+                        Box(modifier = Modifier.padding(innerPadding)) {
+                            com.example.clicker.ui.screens.festivalEdit.StockTablesScreen(
+                                festivalId = key.festivalId,
+                                onNavigateToEdit = { name ->
+                                    backStack.add(AppRoutes.GenericEditRoute(name))
+                                }
+                            )
+                        }
+                    }
+
+                    is AppRoutes.StockMaterielRoute -> NavEntry(key) {
+                        Box(modifier = Modifier.padding(innerPadding)) {
+                            com.example.clicker.ui.screens.festivalEdit.StockMaterielScreen(
+                                festivalId = key.festivalId,
+                                onNavigateToEdit = { name ->
+                                    backStack.add(AppRoutes.GenericEditRoute(name))
+                                }
+                            )
+                        }
+                    }
+
+                    is AppRoutes.ZonesTarifRoute -> NavEntry(key) {
+                        Box(modifier = Modifier.padding(innerPadding)) {
+                            com.example.clicker.ui.screens.festivalEdit.ZonesTarifScreen(
+                                festivalId = key.festivalId,
+                                onNavigateToEdit = { name ->
+                                    backStack.add(AppRoutes.GenericEditRoute(name))
+                                }
+                            )
+                        }
+                    }
+
+                    is AppRoutes.ZonesPlanRoute -> NavEntry(key) {
+                        Box(modifier = Modifier.padding(innerPadding)) {
+                            com.example.clicker.ui.screens.festivalEdit.ZonesPlanScreen(
+                                festivalId = key.festivalId,
+                                onNavigateToEdit = { name ->
+                                    backStack.add(AppRoutes.GenericEditRoute(name))
+                                }
+                            )
+                        }
+                    }
+
+                    is AppRoutes.GenericEditRoute -> NavEntry(key) {
+                        Box(modifier = Modifier.padding(innerPadding)) {
+                            com.example.clicker.ui.screens.festivalEdit.GenericEditScreen(
+                                screenTitle = key.screenTitle,
+                                onBackClick = {
+                                    backStack.removeLastOrNull()
+                                }
+                            )
+                        }
+                    }
+
+                    is AppRoutes.ReservationsRoute -> NavEntry(key) {
+                        Box(modifier = Modifier.padding(innerPadding)) {
+                            ReservationsScreen(
+                                festivalId = key.festivalId,
+                                refreshKey = reservationRefreshKey,
+                                onAddClick = {
+                                    backStack.add(AppRoutes.ReservationCreateRoute(key.festivalId))
+                                },
+                                onReservationClick = { reservation ->
+                                    backStack.add(AppRoutes.ReservationDetailRoute(reservation))
+                                }
+                            )
+                        }
+                    }
+
+                    is AppRoutes.ReservationCreateRoute -> NavEntry(key) {
+                        Box(modifier = Modifier.padding(innerPadding)) {
+                            ReservationCreateScreen(
+                                festivalId = key.festivalId,
+                                onCreateSuccess = {
+                                    reservationRefreshKey++
+                                    backStack.removeLastOrNull()
+                                }
+                            )
+                        }
+                    }
+
+                    is AppRoutes.ReservationDetailRoute -> NavEntry(key) {
+                        Box(modifier = Modifier.padding(innerPadding)) {
+                            ReservationDetailScreen(
+                                reservation = key.reservation,
+                                onDeleteSuccess = {
+                                    reservationRefreshKey++
+                                    backStack.removeLastOrNull()
+                                },
+                                onSuppliesClick = { _, _ ->
+                                    backStack.add(AppRoutes.ReservationSuppliesRoute(key.reservation))
+                                },
+                                onInvoiceClick = {
+                                    backStack.add(AppRoutes.ReservationInvoiceRoute(key.reservation))
+                                },
+                                onContactClick = {
+                                    backStack.add(AppRoutes.ReservationContactRoute(key.reservation))
+                                },
+                                onNoteClick = {
+                                    backStack.add(AppRoutes.ReservationNoteRoute(key.reservation))
+                                }
+                            )
+                        }
+                    }
+
+                    is AppRoutes.ReservationSuppliesRoute -> NavEntry(key) {
+                        Box(modifier = Modifier.padding(innerPadding)) {
+                            ReservationSuppliesScreen(
+                                reservation = key.reservation
+                            )
+                        }
+                    }
+
+                    is AppRoutes.ReservationContactRoute -> NavEntry(key) {
+                        Box(modifier = Modifier.padding(innerPadding)) {
+                            ReservationContactScreen(
+                                reservation = key.reservation
+                            )
+                        }
+                    }
+
+                    is AppRoutes.ReservationNoteRoute -> NavEntry(key) {
+                        Box(modifier = Modifier.padding(innerPadding)) {
+                            ReservationNoteScreen(
+                                reservation = key.reservation
+                            )
+                        }
+                    }
+
+                    is AppRoutes.ReservationInvoiceRoute -> NavEntry(key) {
+                        Box(modifier = Modifier.padding(innerPadding)) {
+                            ReservationInvoiceScreen(
+                                reservation = key.reservation
+                            )
+                        }
+                    }
+
                     Destination.JEUX -> NavEntry(key) {
                         val isOnline = NetworkUtils.isInternetAvailable(context)
 
@@ -344,28 +568,6 @@ fun ClickerNavHost(
                                         backStack.add(AppRoutes.GameCreateRoute)
                                     }
                                 }
-                            )
-                        }
-                    }
-
-                    Destination.EXPOSANTS -> NavEntry(key) {
-                        Box(modifier = Modifier.padding(innerPadding)) {
-                            ExposantsScreen(
-                                exposantViewModel = exposantViewModel,
-                                onAddClick = {
-                                    backStack.add(AppRoutes.ExposantCreateRoute)
-                                },
-                                onDetailsClick = { exposantId ->
-                                    backStack.add(AppRoutes.ExposantDetailRoute(exposantId))
-                                }
-                            )
-                        }
-                    }
-
-                    Destination.ADMIN -> NavEntry(key) {
-                        Box(modifier = Modifier.padding(innerPadding)) {
-                            AdminScreen(
-                                refreshKey = adminRefreshKey
                             )
                         }
                     }
@@ -435,6 +637,20 @@ fun ClickerNavHost(
                                     }
                                 )
                             }
+                        }
+                    }
+
+                    Destination.EXPOSANTS -> NavEntry(key) {
+                        Box(modifier = Modifier.padding(innerPadding)) {
+                            ExposantsScreen(
+                                exposantViewModel = exposantViewModel,
+                                onAddClick = {
+                                    backStack.add(AppRoutes.ExposantCreateRoute)
+                                },
+                                onDetailsClick = { exposantId ->
+                                    backStack.add(AppRoutes.ExposantDetailRoute(exposantId))
+                                }
+                            )
                         }
                     }
 
@@ -569,6 +785,18 @@ fun ClickerNavHost(
                                 onNoteClick = {
                                     backStack.add(AppRoutes.ReservationNoteRoute(key.reservation))
                                 }
+                    is AppRoutes.ReservationPlacementRoute -> NavEntry(key) {
+                        Box(modifier = Modifier.padding(innerPadding)) {
+                            ReservationPlacementScreen(
+                                festivalId = key.festivalId
+                            )
+                        }
+                    }
+
+                    Destination.ADMIN -> NavEntry(key) {
+                        Box(modifier = Modifier.padding(innerPadding)) {
+                            AdminScreen(
+                                refreshKey = adminRefreshKey
                             )
                         }
                     }
@@ -588,26 +816,37 @@ private fun isDestinationSelected(currentDestination: Any?, destination: Destina
     return when (destination) {
         Destination.FESTIVALS ->
             currentDestination == Destination.FESTIVALS ||
-                    currentDestination is AppRoutes.FestivalDetailRoute ||
-                    currentDestination is AppRoutes.ReservationsRoute ||
-                    currentDestination is AppRoutes.ReservationCreateRoute ||
-                    currentDestination is AppRoutes.ReservationDetailRoute ||
-                    currentDestination is AppRoutes.ReservationSuppliesRoute ||
-                    currentDestination is AppRoutes.ReservationContactRoute ||
-                    currentDestination is AppRoutes.ReservationNoteRoute ||
-                    currentDestination is AppRoutes.ReservationInvoiceRoute ||
-                    currentDestination is AppRoutes.ReservationPlacementRoute
+                currentDestination == AppRoutes.FestivalCreateRoute ||
+                currentDestination is AppRoutes.FestivalDetailRoute ||
+                currentDestination is AppRoutes.FestivalModifRoute ||
+                currentDestination is AppRoutes.ModifDetailRoute ||
+                currentDestination is AppRoutes.StockTablesRoute ||
+                currentDestination is AppRoutes.StockMaterielRoute ||
+                currentDestination is AppRoutes.ZonesTarifRoute ||
+                currentDestination is AppRoutes.ZonesPlanRoute ||
+                currentDestination is AppRoutes.GenericEditRoute ||
+                currentDestination is AppRoutes.ReservationsRoute ||
+                currentDestination is AppRoutes.ReservationCreateRoute ||
+                currentDestination is AppRoutes.ReservationDetailRoute ||
+                currentDestination is AppRoutes.ReservationSuppliesRoute ||
+                currentDestination is AppRoutes.ReservationContactRoute ||
+                currentDestination is AppRoutes.ReservationNoteRoute ||
+                currentDestination is AppRoutes.ReservationInvoiceRoute ||
+                currentDestination is AppRoutes.ReservationPlacementRoute
 
-        Destination.JEUX -> currentDestination == Destination.JEUX ||
+
+        Destination.JEUX ->
+            currentDestination == Destination.JEUX ||
                 currentDestination == AppRoutes.GameCreateRoute ||
                 currentDestination is AppRoutes.GameDetailRoute ||
                 currentDestination is AppRoutes.GameEditRoute
 
-        Destination.EXPOSANTS -> currentDestination == Destination.EXPOSANTS ||
+        Destination.EXPOSANTS ->
+            currentDestination == Destination.EXPOSANTS ||
                 currentDestination == AppRoutes.ExposantCreateRoute ||
                 currentDestination is AppRoutes.ExposantDetailRoute ||
                 currentDestination is AppRoutes.ExposantEditRoute
 
-        else -> currentDestination == destination
+        Destination.ADMIN -> currentDestination == Destination.ADMIN
     }
 }
