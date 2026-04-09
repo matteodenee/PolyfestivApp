@@ -94,7 +94,7 @@ object AppViewModelProvider {
                 clickerApplication().container.reservationsRepository,
                 clickerApplication().container.reservationGameRepository,
                 clickerApplication().container.reservationGamePlacementRepository,
-                clickerApplication().container.tarifZoneRepository,
+                clickerApplication().container.tariffZonesRepository,
                 clickerApplication().container.gamesRepository,
                 clickerApplication().container.exposantRepository
             )

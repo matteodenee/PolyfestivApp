@@ -13,7 +13,7 @@ import com.example.clicker.data.mapZone.MapZoneRepository
 import com.example.clicker.data.reservation.ReservationsRepository
 import com.example.clicker.data.reservationGame.ReservationGameRepository
 import com.example.clicker.data.reservationGamePlacement.ReservationGamePlacementRepository
-import com.example.clicker.data.tarifZone.TarifZoneRepository
+import com.example.clicker.data.zone.TariffZonesRepository
 import kotlinx.coroutines.launch
 
 class PublicPlanViewModel(
@@ -22,7 +22,7 @@ class PublicPlanViewModel(
     private val reservationsRepository: ReservationsRepository,
     private val reservationGameRepository: ReservationGameRepository,
     private val reservationGamePlacementRepository: ReservationGamePlacementRepository,
-    private val tarifZoneRepository: TarifZoneRepository,
+    private val tarifZoneRepository: TariffZonesRepository,
     private val gamesRepository: GamesRepository,
     private val exposantRepository: ExposantRepository
 ) : ViewModel() {
@@ -51,7 +51,7 @@ class PublicPlanViewModel(
                 val mapZones = mapZoneRepository.getMapZonesByFestival(festivalId)
                 val reservations = reservationsRepository.getReservationsByFestival(festivalId)
                 val placements = reservationGamePlacementRepository.getPlacementsByFestival(festivalId)
-                val tariffZones = tarifZoneRepository.getTarifZonesByFestival(festivalId)
+                val tariffZones = tarifZoneRepository.getTariffZonesByFestival(festivalId)
                 val games = gamesRepository.getGames()
                 val exposants = exposantRepository.getExposants()
 
