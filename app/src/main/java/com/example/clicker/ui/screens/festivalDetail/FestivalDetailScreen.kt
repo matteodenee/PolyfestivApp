@@ -126,6 +126,7 @@ fun FestivalDetailScreen(
     onEditClick: (Int) -> Unit,
     onReservationsClick: (Int) -> Unit,
     onPlacementClick: (Int) -> Unit,
+    onPlanClick: (Int) -> Unit,
     onDeleteSuccess: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: FestivalDetailViewModel = viewModel(
@@ -222,7 +223,7 @@ fun FestivalDetailScreen(
                         "Placement jeux" to { onPlacementClick(festival.id) },
                         "Jeux du festival" to { /* navigate */ },
                         "Exposants du festival" to { /* navigate */ },
-                        "Plan public" to { /* navigate */ },
+                        "Plan public" to { onPlanClick(festival.id) },
                     )
                 )
             }
