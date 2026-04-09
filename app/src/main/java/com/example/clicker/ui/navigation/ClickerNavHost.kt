@@ -1,5 +1,7 @@
 package com.example.clicker.ui.navigation
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -55,12 +57,14 @@ import com.example.clicker.ui.screens.reservationCreate.ReservationCreateScreen
 import com.example.clicker.ui.screens.reservationDetail.ReservationDetailScreen
 import com.example.clicker.ui.screens.reservationInvoice.ReservationInvoiceScreen
 import com.example.clicker.ui.screens.reservationNote.ReservationNoteScreen
+import com.example.clicker.ui.screens.reservationPlacement.ReservationPlacementScreen
 import com.example.clicker.ui.screens.reservationSupplies.ReservationSuppliesScreen
 import com.example.clicker.ui.screens.reservations.ReservationsScreen
 import com.example.clicker.ui.theme.PrimaryYellow
 import com.example.clicker.ui.utils.network.NetworkUtils
 import com.example.clicker.ui.viewmodel.AppViewModelProvider
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ClickerNavHost(
@@ -280,6 +284,9 @@ fun ClickerNavHost(
                                 },
                                 onReservationsClick = { festivalId ->
                                     backStack.add(AppRoutes.ReservationsRoute(festivalId))
+                                },
+                                onPlacementClick = { festivalId ->
+                                    backStack.add(AppRoutes.ReservationPlacementRoute(festivalId))
                                 },
                                 onDeleteSuccess = {
                                     festivalsRefreshKey++
@@ -655,6 +662,14 @@ fun ClickerNavHost(
                                     )
                                 }
                             }
+                        }
+                    }
+
+                    is AppRoutes.ReservationPlacementRoute -> NavEntry(key) {
+                        Box(modifier = Modifier.padding(innerPadding)) {
+                            ReservationPlacementScreen(
+                                festivalId = key.festivalId
+                            )
                         }
                     }
 

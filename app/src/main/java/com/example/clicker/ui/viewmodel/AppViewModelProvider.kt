@@ -21,6 +21,7 @@ import com.example.clicker.ui.screens.festivalEdit.StockMaterielViewModel
 import com.example.clicker.ui.screens.festivalEdit.ZonesTarifViewModel
 import com.example.clicker.ui.screens.festivalEdit.ZonesPlanViewModel
 import com.example.clicker.ui.screens.admin.AdminViewModel
+import com.example.clicker.ui.screens.reservationPlacement.ReservationPlacementViewModel
 import com.example.clicker.ui.screens.reservationDetail.ReservationDetailViewModel
 import com.example.clicker.ui.screens.reservations.ReservationsViewModel
 import com.example.clicker.ui.screens.reservationCreate.ReservationCreateViewModel
@@ -81,6 +82,21 @@ object AppViewModelProvider {
         initializer {
             ExposantViewModel(
                 repository = clickerApplication().container.exposantRepository
+            )
+        }
+        
+        initializer {
+            ReservationPlacementViewModel(
+                clickerApplication().container.reservationsRepository,
+                clickerApplication().container.reservationGameRepository,
+                clickerApplication().container.reservationGamePlacementRepository,
+                clickerApplication().container.reservationTariffzoneAllocationRepository,
+                clickerApplication().container.tariffZonesRepository,
+                clickerApplication().container.mapZoneRepository,
+                clickerApplication().container.festivalTableRepository,
+                clickerApplication().container.equipmentsRepository,
+                clickerApplication().container.festivalEquipmentStockRepository,
+                clickerApplication().container.gamesRepository
             )
         }
 

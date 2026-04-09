@@ -12,6 +12,10 @@ import com.example.clicker.data.zone.MapZonesRepository
 import com.example.clicker.data.local.game.GameDatabase
 import com.example.clicker.data.network.RetrofitInstance
 import com.example.clicker.data.admin.AdminRepository
+import com.example.clicker.data.mapZone.MapZoneRepository
+import com.example.clicker.data.festivalTable.FestivalTableRepository
+import com.example.clicker.data.festivalEquipmentStock.FestivalEquipmentStockRepository
+import com.example.clicker.data.reservationGamePlacement.ReservationGamePlacementRepository
 import com.example.clicker.data.reservation.ReservationsRepository
 import com.example.clicker.data.reservationGame.ReservationGameRepository
 import com.example.clicker.data.reservationTariffzoneAllocation.ReservationTariffzoneAllocationRepository
@@ -42,6 +46,21 @@ class AppDataContainer(
         AdminRepository(RetrofitInstance.adminApi)
     }
 
+    override val mapZoneRepository: MapZoneRepository by lazy {
+        MapZoneRepository(RetrofitInstance.mapZoneApi)
+    }
+
+    override val festivalTableRepository: FestivalTableRepository by lazy {
+        FestivalTableRepository(RetrofitInstance.festivalTableApi)
+    }
+
+    override val festivalEquipmentStockRepository: FestivalEquipmentStockRepository by lazy {
+        FestivalEquipmentStockRepository(RetrofitInstance.festivalEquipmentStockApi)
+    }
+
+    override val reservationGamePlacementRepository: ReservationGamePlacementRepository by lazy {
+        ReservationGamePlacementRepository(RetrofitInstance.reservationGamePlacementApi)
+    }
     override val reservationsRepository: ReservationsRepository by lazy {
         ReservationsRepository(RetrofitInstance.reservationsApi)
     }

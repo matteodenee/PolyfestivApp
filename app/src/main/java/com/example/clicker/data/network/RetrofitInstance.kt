@@ -15,6 +15,10 @@ import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
 import com.example.clicker.data.admin.AdminApiService
+import com.example.clicker.data.mapZone.MapZoneApiService
+import com.example.clicker.data.festivalTable.FestivalTableApiService
+import com.example.clicker.data.festivalEquipmentStock.FestivalEquipmentStockApiService
+import com.example.clicker.data.reservationGamePlacement.ReservationGamePlacementApiService
 import com.example.clicker.data.reservation.ReservationsApiService
 import com.example.clicker.data.reservationGame.ReservationGameApiService
 import com.example.clicker.data.reservationTariffzoneAllocation.ReservationTariffzoneAllocationApiService
@@ -98,7 +102,22 @@ object RetrofitInstance {
     val exposantApi: ExposantApiService by lazy {
         retrofit.create(ExposantApiService::class.java)
     }
+    val mapZoneApi: MapZoneApiService by lazy {
+        retrofit.create(MapZoneApiService::class.java)
+    }
 
+    val festivalTableApi: FestivalTableApiService by lazy {
+        retrofit.create(FestivalTableApiService::class.java)
+    }
+
+    val festivalEquipmentStockApi: FestivalEquipmentStockApiService by lazy {
+        retrofit.create(FestivalEquipmentStockApiService::class.java)
+    }
+
+    val reservationGamePlacementApi: ReservationGamePlacementApiService by lazy {
+        retrofit.create(ReservationGamePlacementApiService::class.java)
+    }
+    
     val reservationsApi: ReservationsApiService by lazy {
         retrofit.create(ReservationsApiService::class.java)
     }
